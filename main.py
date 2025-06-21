@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushBut
 
 SCROLL_WIDTH = 250
 
+
 class MenuScroll(QLabel):
     clicked = QtCore.Signal()
 
@@ -19,6 +20,7 @@ class MenuScroll(QLabel):
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.clicked.emit()
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -67,7 +69,7 @@ class MainWindow(QMainWindow):
         self.tray_icon.show()
 
         icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
-                                                          QtCore.Qt.SmoothTransformation)
+                                                                        QtCore.Qt.SmoothTransformation)
 
         self.menu_scroll = MenuScroll(self)
         icon_width = icon_pixmap.width()
@@ -78,7 +80,6 @@ class MainWindow(QMainWindow):
         y = self.pixmap.height() - icon_height
 
         self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
-
 
         self.menu_scroll.setPixmap(icon_pixmap)
         self.menu_scroll.setScaledContents(True)
@@ -132,7 +133,7 @@ class MainWindow(QMainWindow):
         print("Scroll clicked!")
         if not self.menu_scroll.open:
             icon_pixmap = QPixmap("assets/scroll_open.png").scaledToWidth(SCROLL_WIDTH,
-                                                                            QtCore.Qt.SmoothTransformation)
+                                                                          QtCore.Qt.SmoothTransformation)
             icon_width = icon_pixmap.width()
             icon_height = icon_pixmap.height()
 
@@ -161,7 +162,6 @@ class MainWindow(QMainWindow):
             self.menu_scroll.setScaledContents(True)
 
             self.menu_scroll.open = False
-
 
 
 if __name__ == "__main__":
