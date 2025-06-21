@@ -4,7 +4,7 @@ from ivern import Ivern
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon, QWidget, QScrollArea, QVBoxLayout, QSizePolicy
 
 SCROLL_WIDTH = 250
 
@@ -12,14 +12,55 @@ SCROLL_WIDTH = 250
 class MenuScroll(QLabel):
     clicked = QtCore.Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, x, y, width, height, parent=None):
         super().__init__(parent)
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
         self.open = False
 
+        self.x = x
+        self.y = y
+        self.icon_width = width
+        self.icon_height = height
+
+        # Scroll area setup (child of the label)
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setGeometry(x-3, 55, width-45, height*4)
+        self.scroll_area.setStyleSheet("""
+            QScrollArea {
+                background-color: transparent;
+                border: none;
+            }
+            QScrollArea QWidget {
+                background-color: transparent;
+            }
+            QScrollArea > QWidget > QWidget {
+                background-color: transparent;
+            }
+        """)
+        self.scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(True)
+
+        # Scroll area content
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+        for i in range(10):
+            button = QPushButton(f"Item {i+1}")
+            button.clicked.connect(lambda _, n=i: print(f"Button {n + 1} clicked"))
+            scroll_layout.addWidget(button)
+        self.scroll_area.setWidget(scroll_content)
+        self.scroll_area.hide()
+
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.clicked.emit()
+    
+    def toggle_scroll(self):
+        if self.open:
+            self.scroll_area.hide()
+        else:
+            self.scroll_area.show()
+        self.open = not self.open
 
 
 class MainWindow(QMainWindow):
@@ -70,14 +111,15 @@ class MainWindow(QMainWindow):
 
         icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
                                                                         QtCore.Qt.SmoothTransformation)
-
-        self.menu_scroll = MenuScroll(self)
+        
         icon_width = icon_pixmap.width()
         icon_height = icon_pixmap.height()
-
+    
         # Center horizontally, align to bottom (10px above the edge)
         x = (self.pixmap.width() - icon_width) // 2
         y = self.pixmap.height() - icon_height
+
+        self.menu_scroll = MenuScroll(x, y, icon_width, icon_height, self)
 
         self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
 
@@ -96,7 +138,7 @@ class MainWindow(QMainWindow):
                                 border-radius: 6px;
                                 font-size: 12px;
                             """)
-        self.text_label.hide()
+        #self.text_label.hide()
 
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
 
@@ -132,18 +174,21 @@ class MainWindow(QMainWindow):
     def on_rectangle_clicked(self):
         print("Scroll clicked!")
         if not self.menu_scroll.open:
+
             icon_pixmap = QPixmap("assets/scroll_open.png").scaledToWidth(SCROLL_WIDTH,
                                                                           QtCore.Qt.SmoothTransformation)
             icon_width = icon_pixmap.width()
             icon_height = icon_pixmap.height()
 
             # Center horizontally, align to bottom (10px above the edge)
-            x = (self.pixmap.width() - icon_width) // 2
+            x = (self.pixmap.width() - icon_width) // 2 + 5
             y = self.pixmap.height() - icon_height
 
             self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
             self.menu_scroll.setPixmap(icon_pixmap)
             self.menu_scroll.setScaledContents(True)
+
+            self.menu_scroll.scroll_area.show()
 
             self.menu_scroll.open = True
         else:
@@ -153,7 +198,7 @@ class MainWindow(QMainWindow):
             icon_height = icon_pixmap.height()
 
             # Center horizontally, align to bottom (10px above the edge)
-            x = (self.pixmap.width() - icon_width) // 2
+            x = (self.pixmap.width() - icon_width) // 2 + 5
             y = self.pixmap.height() - icon_height
 
             self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
@@ -161,8 +206,12 @@ class MainWindow(QMainWindow):
             self.menu_scroll.setPixmap(icon_pixmap)
             self.menu_scroll.setScaledContents(True)
 
+            self.menu_scroll.scroll_area.hide()
+
             self.menu_scroll.open = False
 
+    def on_button_click(self, index):
+        print(f"Button {index + 1} clicked!")
 
 if __name__ == "__main__":
     autostart.add_to_startup()
