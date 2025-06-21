@@ -1,6 +1,6 @@
 @echo off
-echo Building executable with PyInstaller...
+Echo Deleting Old Program...
+taskkill /f /im main.exe >nul 2>&1
+Echo Building...
 pyinstaller --noconfirm --onefile --windowed main.py
-
-echo Done. Check the dist folder for cornerpond.exe
 pause
