@@ -11,12 +11,19 @@ class User:
     tasks: list[Task] = field(default_factory=list)
     finished_tasks: list[Task] = field(default_factory=list)
     finished_tutorial: bool = False
+    recently_deleted: list[Task] = field(default_factory=list)
 
     def to_dict(self):
         tasks = [task.to_dict() for task in self.tasks]
         finished_tasks = [task.to_dict() for task in self.finished_tasks]
         return {'streaks': self.streaks, 'tasks': tasks,
                 'finished_tasks': finished_tasks, 'finished_tutorial': self.finished_tutorial}
+
+    def delete_task(self, index):
+        self.recently_deleted.append(self.tasks.pop(index))
+
+    def restore(self, index):
+        self.tasks.append(self.recently_deleted.pop(index))
 
 @dataclass
 class Task:

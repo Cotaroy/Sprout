@@ -1,6 +1,5 @@
 import sys
 import autostart
-from ivern import Ivern
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
@@ -85,8 +84,6 @@ class MainWindow(QMainWindow):
         original_pixmap = QPixmap(R("assets/Base_Bg.png"))
         scaled_width = 300  # change this as needed
         scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
-
-        self.ivern = Ivern()
 
         self.pixmap = scaled_pixmap
         self.image_label = QLabel(self)
