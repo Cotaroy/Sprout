@@ -2,5 +2,5 @@
 Echo Deleting Old Program...
 taskkill /f /im main.exe >nul 2>&1
 Echo Building...
-pyinstaller --noconfirm --onefile --windowed main.py
+pyinstaller --noconfirm --onefile --windowed main.py --add-data "assets/*;assets"
 pause

@@ -1,5 +1,6 @@
 import sys
 import autostart
+from pathretriever import R
 import todolist
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
@@ -23,7 +24,7 @@ class MainWindow(QMainWindow):
 
         # Load sprout image
         # Load and resize sprout image
-        original_pixmap = QPixmap("assets/Base_Bg_Wide.png")
+        original_pixmap = QPixmap(R("assets/Base_Bg_Wide.png"))
         scaled_width = 500  # change this as needed
         scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
 
@@ -46,7 +47,7 @@ class MainWindow(QMainWindow):
         self.move_to_bottom_right_above_taskbar()
 
         # System tray icon
-        self.tray_icon = QSystemTrayIcon(QIcon("assets/Base_Bg_Wide.png"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon(R("assets/Base_Bg_Wide.png")), self)
         tray_menu = QMenu()
 
         restore_action = QAction("Restore", self)
@@ -71,7 +72,7 @@ class MainWindow(QMainWindow):
 
         self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
 
-        icon_pixmap = QPixmap("assets/Base_Bg.png").scaled(150, 100, QtCore.Qt.KeepAspectRatio,
+        icon_pixmap = QPixmap(R("assets/Base_Bg.png")).scaled(150, 100, QtCore.Qt.KeepAspectRatio,
                                                         QtCore.Qt.SmoothTransformation)
 
         self.menu_scroll.setPixmap(icon_pixmap)
