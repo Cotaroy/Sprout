@@ -1,5 +1,6 @@
 import sys
 import autostart
+import todolist
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QSystemTrayIcon
@@ -10,13 +11,18 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # Load sprout image
-        self.pixmap = QPixmap("sprout.png")
+        # Load and resize sprout image
+        original_pixmap = QPixmap("assets/Corner_Todo_App.png")
+        scaled_width = 300  # change this as needed
+        scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
+
+        self.pixmap = scaled_pixmap
         self.image_label = QLabel(self)
         self.image_label.setPixmap(self.pixmap)
-        self.setCentralWidget(self.image_label)
+        self.image_label.setFixedSize(self.pixmap.size())  # Ensures the full image is visible
 
         self.text_label = QLabel(self)
-        self.text_label.setText("This is a long message that should wrap into multiple lines properly.")
+        self.text_label.setText("beruewh98pewbuifbiuwefub abiufabofibuafnoiaipfepdfauifp")
         self.text_label.setWordWrap(True)
         self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
         self.text_label.setFixedWidth(self.pixmap.width())
@@ -43,7 +49,7 @@ class MainWindow(QMainWindow):
         self.move_to_bottom_right_above_taskbar()
 
         # System tray icon
-        self.tray_icon = QSystemTrayIcon(QIcon("sprout.png"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon("assets/Corner_Todo_App.png"), self)
         tray_menu = QMenu()
 
         restore_action = QAction("Restore", self)
@@ -76,8 +82,10 @@ class MainWindow(QMainWindow):
 
     def contextMenuEvent(self, event):
         menu = QMenu(self)
+
         hide_action = QAction("Hide to Tray", self)
         hide_action.triggered.connect(self.hide)
+
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(QApplication.quit)
         menu.addAction(hide_action)
