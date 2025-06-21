@@ -1,5 +1,6 @@
 import sys
 import autostart
+from event import Event
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
