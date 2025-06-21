@@ -1,5 +1,8 @@
 import sys
 import autostart
+from saveload import load_user
+
+from user import User
 from event import Event
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
@@ -14,9 +17,13 @@ class MenuScroll(QLabel):
 
     def __init__(self, x, y, width, height, parent=None):
         super().__init__(parent)
+
+        self.user = load_user('data/test.json')
+
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
         self.open = False
 
+        # center of screen
         self.x = x
         self.y = y
         self.icon_width = width
@@ -24,7 +31,7 @@ class MenuScroll(QLabel):
 
         # Scroll area setup (child of the label)
         self.scroll_area = QScrollArea(self)
-        self.scroll_area.setGeometry(x-3, 55, width-45, height*4)
+        self.scroll_area.setGeometry(x, 55, width-70, height*4)
         self.scroll_area.setStyleSheet("""
             QScrollArea {
                 background-color: transparent;
@@ -42,25 +49,68 @@ class MenuScroll(QLabel):
         self.scroll_area.setWidgetResizable(True)
 
         # Scroll area content
-        scroll_content = QWidget()
-        scroll_layout = QVBoxLayout(scroll_content)
-        for i in range(10):
-            button = QPushButton(f"Item {i+1}")
-            button.clicked.connect(lambda _, n=i: print(f"Button {n + 1} clicked"))
-            scroll_layout.addWidget(button)
-        self.scroll_area.setWidget(scroll_content)
-        self.scroll_area.hide()
+        self.update_menu()
+
+        self.checkmarked_indices = []
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.clicked.emit()
 
     def toggle_scroll(self):
-        if self.open:
-            self.scroll_area.hide()
-        else:
+        from PySide6.QtCore import Qt
+
+        if not self.open:
+            icon_pixmap = QPixmap(R("assets/scroll_open.png")).scaledToWidth(SCROLL_WIDTH, Qt.SmoothTransformation)
+            icon_width = icon_pixmap.width()
+            icon_height = icon_pixmap.height()
+
+            self.setGeometry(self.x, self.y - 300, icon_width, icon_height)
+            self.setPixmap(icon_pixmap)
+            self.setScaledContents(True)
             self.scroll_area.show()
-        self.open = not self.open
+            self.open = True
+        else:
+            icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH, Qt.SmoothTransformation)
+            icon_width = icon_pixmap.width()
+            icon_height = icon_pixmap.height()
+
+            self.checkmarked_indices.sort(reverse=True)
+            print(self.checkmarked_indices)
+            for i in self.checkmarked_indices:
+                if i < len(self.user.tasks):
+                    self.user.complete_task(i)
+                    print('task done')
+            self.update_menu()
+
+            self.setGeometry(self.x, self.y, icon_width, icon_height)
+            self.setPixmap(icon_pixmap)
+            self.setScaledContents(True)
+            self.scroll_area.hide()
+            self.open = False
+
+    def update_menu(self):
+        """Update the menu items based on the user's events."""
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+        for i in range(len(self.user.tasks)):
+            row_layout = QtWidgets.QHBoxLayout()
+            checkbox = QtWidgets.QCheckBox()
+            checkbox.stateChanged.connect(lambda state, index=i: self.on_checkbox_toggled(index, state))
+            label = QtWidgets.QLabel(f"{self.user.tasks[i].description}")
+            label.setFixedWidth(180)
+            label.setStyleSheet("font-size: 14px; text-align: left;")
+            row_layout.addWidget(checkbox)
+            row_layout.addWidget(label)
+            scroll_layout.addLayout(row_layout)
+        self.scroll_area.setWidget(scroll_content)
+        self.scroll_area.hide()
+
+    def on_checkbox_toggled(self, index, state):
+        print(f"Checkbox for task {index} changed to state {state}")
+        if state == 2:
+            self.checkmarked_indices.append(index)
+            print(self.checkmarked_indices)
 
 class EventSpeechBubble(QLabel):
     clicked = QtCore.Signal()
@@ -137,23 +187,10 @@ class MainWindow(QMainWindow):
         self.menu_scroll.setPixmap(icon_pixmap)
         self.menu_scroll.setScaledContents(True)
 
-        self.text_label = QLabel(self.menu_scroll)
-        self.text_label.setText("hifewnoiriefebu")
-        self.text_label.setWordWrap(True)
-        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.text_label.setGeometry(0, 0, self.menu_scroll.width(), self.menu_scroll.height())
-        self.text_label.setStyleSheet("""
-                                background-color: transparent;
-                                color: white;
-                                padding: 4px 10px;
-                                border-radius: 6px;
-                                font-size: 12px;
-                            """)
-        #self.text_label.hide()
-
         self.setup_speech_bubble()
+        self.speech_bubble.hide()
 
-        self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
+        self.menu_scroll.clicked.connect(self.menu_scroll.toggle_scroll)
 
 
     def move_to_bottom_right_above_taskbar(self):
@@ -184,44 +221,6 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-
-    def on_rectangle_clicked(self):
-        print("Scroll clicked!")
-        if not self.menu_scroll.open:
-            icon_pixmap = QPixmap(R("assets/scroll_open.png")).scaledToWidth(SCROLL_WIDTH,
-                                                                          QtCore.Qt.SmoothTransformation)
-            icon_width = icon_pixmap.width()
-            icon_height = icon_pixmap.height()
-
-            # Center horizontally, align to bottom (10px above the edge)
-            x = (self.pixmap.width() - icon_width) // 2
-            y = self.pixmap.height() - icon_height
-
-            self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
-            self.menu_scroll.setPixmap(icon_pixmap)
-            self.menu_scroll.setScaledContents(True)
-
-            self.menu_scroll.scroll_area.show()
-
-            self.menu_scroll.open = True
-        else:
-            icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH,
-                                                                            QtCore.Qt.SmoothTransformation)
-            icon_width = icon_pixmap.width()
-            icon_height = icon_pixmap.height()
-
-            # Center horizontally, align to bottom (10px above the edge)
-            x = (self.pixmap.width() - icon_width) // 2 + 5
-            y = self.pixmap.height() - icon_height
-
-            self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
-
-            self.menu_scroll.setPixmap(icon_pixmap)
-            self.menu_scroll.setScaledContents(True)
-
-            self.menu_scroll.scroll_area.hide()
-
-            self.menu_scroll.open = False
 
     def on_button_click(self, index):
         print(f"Button {index + 1} clicked!")

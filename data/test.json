@@ -5,6 +5,22 @@
         {
             "description": "say hello to the neighbours",
             "deadline": "2025-06-21"
+        },
+        {
+            "description": "water the plants",
+            "deadline": "2025-06-22"
+        },
+        {
+            "description": "finish reading a book",
+            "deadline": "2025-06-23"
+        },
+        {
+            "description": "go for a 30-minute walk",
+            "deadline": "2025-06-24"
+        },
+        {
+            "description": "call a friend",
+            "deadline": "2025-06-25"
         }
     ],
     "finished_tasks": [],
