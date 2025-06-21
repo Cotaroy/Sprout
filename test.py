@@ -1,54 +1,55 @@
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
-from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QPainter, QColor
 import sys
 
-class CornerPond(QWidget):
+from PySide6 import QtGui
+from PySide6.QtGui import QPixmap, QAction
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QMenu
+
+
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setFixedSize(200, 100)  # Size of the window
 
-        self._old_pos = None
+        pixmap = QtGui.QPixmap("sprout.png")
+        print(pixmap)
+        label = QLabel(self)
+        label.setPixmap(pixmap)
+        self.setCentralWidget(label)
 
-        # Sample content
-        layout = QVBoxLayout()
-        label = QLabel("Cornerpond\n(mini app)")
-        label.setStyleSheet("color: white; font-size: 14px;")
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
-        self.setLayout(layout)
+        self.setWindowFlags(
+            QtCore.Qt.WindowType.Window |
+            QtCore.Qt.WindowType.FramelessWindowHint |
+            QtCore.Qt.WindowType.WindowStaysOnTopHint |
+            QtCore.Qt.WindowType.Tool
+        )
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self._old_pos = event.globalPosition().toPoint()
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
 
-    def mouseMoveEvent(self, event):
-        if self._old_pos is not None:
-            delta = event.globalPosition().toPoint() - self._old_pos
-            self.move(self.pos() + delta)
-            self._old_pos = event.globalPosition().toPoint()
+        # Resize window to image size
+        self.resize(pixmap.size())
 
-    def mouseReleaseEvent(self, event):
-        self._old_pos = None
+        self.move_to_bottom_right()
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(QColor(30, 30, 30, 180))  # Semi-transparent background
-        painter.setPen(Qt.NoPen)
-        painter.drawRoundedRect(self.rect(), 15, 15)
+        self.show()
 
     def move_to_bottom_right(self):
-        screen = QGuiApplication.primaryScreen()
-        geometry = screen.availableGeometry()
-        x = geometry.right() - self.width() - 10  # 10px margin from edge
-        y = geometry.bottom() - self.height() - 10
+        screen = QApplication.primaryScreen().geometry()
+        window_rect = self.geometry()
+
+        x = screen.width() - window_rect.width()
+        y = screen.height() - window_rect.height()
+
         self.move(x, y)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        quit_action = QAction("Quit", self)
+        quit_action.triggered.connect(QApplication.quit)
+        menu.addAction(quit_action)
+        menu.exec(event.globalPos())
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = CornerPond()
-    window.show()
-    sys.exit(app.exec())
+    window = MainWindow()
+    app.exec()
