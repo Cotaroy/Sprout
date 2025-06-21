@@ -58,8 +58,6 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-        self.show()
-
     def position_text_label(self):
         """Place text box at the bottom of the image, adjusting height dynamically."""
         self.text_label.adjustSize()
@@ -102,4 +100,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
+    window.show()
     sys.exit(app.exec())
