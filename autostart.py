@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 def add_to_startup(app_name="Cornerpond", exe_path=None):
