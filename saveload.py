@@ -1,5 +1,5 @@
 
-from datetime import datetime, date
+from datetime import datetime
 import json
 from user import User, Task
 
