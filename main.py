@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
 
         # Load sprout image
         # Load and resize sprout image
-        original_pixmap = QPixmap("assets/Base_Bg.png")
+        original_pixmap = QPixmap(R("assets/Base_Bg.png"))
         scaled_width = 300  # change this as needed
         scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
 
@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
         self.move_to_bottom_right_above_taskbar()
 
         # System tray icon
-        self.tray_icon = QSystemTrayIcon(QIcon("assets/Base_Bg_Wide.png"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon(R("assets/Base_Bg_Wide.png")), self)
         tray_menu = QMenu()
 
         restore_action = QAction("Restore", self)
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-        icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
+        icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH,
                                                                         QtCore.Qt.SmoothTransformation)
 
         self.menu_scroll = MenuScroll(self)
@@ -148,7 +148,7 @@ class MainWindow(QMainWindow):
     def on_rectangle_clicked(self):
         print("Scroll clicked!")
         if not self.menu_scroll.open:
-            icon_pixmap = QPixmap("assets/scroll_open.png").scaledToWidth(SCROLL_WIDTH,
+            icon_pixmap = QPixmap(R("assets/scroll_open.png")).scaledToWidth(SCROLL_WIDTH,
                                                                           QtCore.Qt.SmoothTransformation)
             icon_width = icon_pixmap.width()
             icon_height = icon_pixmap.height()
@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
 
             self.menu_scroll.open = True
         else:
-            icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
+            icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH,
                                                                             QtCore.Qt.SmoothTransformation)
             icon_width = icon_pixmap.width()
             icon_height = icon_pixmap.height()
@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
             self.menu_scroll.open = False
 
     def setup_speech_bubble(self):
-        bubble_pixmap = QPixmap("assets/speech_bubble.png").scaledToWidth(SCROLL_WIDTH,
+        bubble_pixmap = QPixmap(R("assets/speech_bubble.png")).scaledToWidth(SCROLL_WIDTH,
                                                                           QtCore.Qt.SmoothTransformation)
 
         self.speech_bubble = EventSpeechBubble(['Hello', 'there', 'i', 'am', 'bob'], self)
