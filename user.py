@@ -22,7 +22,7 @@ class User:
     def delete_task(self, index):
         self.recently_deleted.append(self.tasks.pop(index))
 
-    def restore(self, index):
+    def restore_task(self, index):
         self.tasks.append(self.recently_deleted.pop(index))
 
 @dataclass
