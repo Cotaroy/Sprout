@@ -1,7 +1,7 @@
 import sys
 import autostart
-from ivern import Ivern
 from pathretriever import R
+import todolist
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon
@@ -24,11 +24,9 @@ class MainWindow(QMainWindow):
 
         # Load sprout image
         # Load and resize sprout image
-        original_pixmap = QPixmap("assets/Base_Bg.png")
-        scaled_width = 300  # change this as needed
+        original_pixmap = QPixmap(R("assets/Base_Bg_Wide.png"))
+        scaled_width = 500  # change this as needed
         scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
-
-        self.ivern = Ivern()
 
         self.pixmap = scaled_pixmap
         self.image_label = QLabel(self)
@@ -49,7 +47,7 @@ class MainWindow(QMainWindow):
         self.move_to_bottom_right_above_taskbar()
 
         # System tray icon
-        self.tray_icon = QSystemTrayIcon(QIcon("assets/Base_Bg_Wide.png"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon(R("assets/Base_Bg_Wide.png")), self)
         tray_menu = QMenu()
 
         restore_action = QAction("Restore", self)
@@ -64,12 +62,9 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-        icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(200,
-                                                          QtCore.Qt.SmoothTransformation)
-
         self.menu_scroll = MenuScroll(self)
-        icon_width = icon_pixmap.width()
-        icon_height = icon_pixmap.height()
+        icon_width = 150
+        icon_height = 100
 
         # Center horizontally, align to bottom (10px above the edge)
         x = (self.pixmap.width() - icon_width) // 2
@@ -77,23 +72,11 @@ class MainWindow(QMainWindow):
 
         self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
 
+        icon_pixmap = QPixmap(R("assets/Base_Bg.png")).scaled(150, 100, QtCore.Qt.KeepAspectRatio,
+                                                        QtCore.Qt.SmoothTransformation)
 
         self.menu_scroll.setPixmap(icon_pixmap)
         self.menu_scroll.setScaledContents(True)
-
-        self.text_label = QLabel(self.menu_scroll)
-        self.text_label.setText("hifewnoiriefebu")
-        self.text_label.setWordWrap(True)
-        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.text_label.setGeometry(0, 0, self.menu_scroll.width(), self.menu_scroll.height())
-        self.text_label.setStyleSheet("""
-                                background-color: transparent;
-                                color: white;
-                                padding: 4px 10px;
-                                border-radius: 6px;
-                                font-size: 12px;
-                            """)
-        self.text_label.hide()
 
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
 
