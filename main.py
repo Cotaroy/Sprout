@@ -1,5 +1,6 @@
 import sys
 import autostart
+import audio_player
 from event import Event
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
@@ -155,6 +156,9 @@ class MainWindow(QMainWindow):
 
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
 
+        # AUDIO
+        self.sfx_player = audio_player.AudioPlayer()
+
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
@@ -187,6 +191,7 @@ class MainWindow(QMainWindow):
 
     def on_rectangle_clicked(self):
         print("Scroll clicked!")
+
         if not self.menu_scroll.open:
             icon_pixmap = QPixmap(R("assets/scroll_open.png")).scaledToWidth(SCROLL_WIDTH,
                                                                           QtCore.Qt.SmoothTransformation)
@@ -222,6 +227,9 @@ class MainWindow(QMainWindow):
             self.menu_scroll.scroll_area.hide()
 
             self.menu_scroll.open = False
+
+        # play SFX of scroll opening/closing
+        self.sfx_player.play_sfx(R("audio/sfx/Amethyst_step1.ogg"))
 
     def on_button_click(self, index):
         print(f"Button {index + 1} clicked!")
@@ -268,6 +276,21 @@ if __name__ == "__main__":
     autostart.add_to_startup()
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+
+    # AUDIO
+    bgm_player = audio_player.AudioPlayer()
+    bgm_player.set_volume(20)  
+    bgm_player.play_bg_track(R("audio/bgm/bigbig_tree_track.mp3"))
+    """
+    Pseudo-code for adding streak interaction:
+
+    if user's streak == 0:
+        play_bg_track( <sad sprout track>)
+    elif 1 <= user's streak  <= 3:
+        ....
+    """
+    
+
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
