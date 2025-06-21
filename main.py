@@ -3,7 +3,7 @@ import autostart
 import todolist
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon
 
 
 class MainWindow(QMainWindow):
@@ -12,27 +12,14 @@ class MainWindow(QMainWindow):
 
         # Load sprout image
         # Load and resize sprout image
-        original_pixmap = QPixmap("assets/Corner_Todo_App.png")
-        scaled_width = 300  # change this as needed
+        original_pixmap = QPixmap("assets/Base_Bg_Wide.png")
+        scaled_width = 500  # change this as needed
         scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
 
         self.pixmap = scaled_pixmap
         self.image_label = QLabel(self)
         self.image_label.setPixmap(self.pixmap)
         self.image_label.setFixedSize(self.pixmap.size())  # Ensures the full image is visible
-
-        self.text_label = QLabel(self)
-        self.text_label.setText("beruewh98pewbuifbiuwefub abiufabofibuafnoiaipfepdfauifp")
-        self.text_label.setWordWrap(True)
-        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.text_label.setFixedWidth(self.pixmap.width())
-        self.text_label.setStyleSheet("""
-            background-color: rgba(0, 0, 0, 180);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-        """)
 
         # Window appearance
         self.setWindowFlags(
@@ -43,13 +30,14 @@ class MainWindow(QMainWindow):
         )
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
 
+
+
         # Resize and position
         self.resize(self.pixmap.size())
-        self.position_text_label()
         self.move_to_bottom_right_above_taskbar()
 
         # System tray icon
-        self.tray_icon = QSystemTrayIcon(QIcon("assets/Corner_Todo_App.png"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon("assets/Base_Bg_Wide.png"), self)
         tray_menu = QMenu()
 
         restore_action = QAction("Restore", self)
@@ -64,15 +52,33 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-    def position_text_label(self):
-        """Place text box at the bottom of the image, adjusting height dynamically."""
-        self.text_label.adjustSize()
-        label_height = self.text_label.height()
-        self.text_label.setGeometry(0, self.pixmap.height() - label_height, self.pixmap.width(), label_height)
+        # Clickable transparent rectangle
+        self.clickable_area = QPushButton(self)
+        self.clickable_area.setGeometry(50, 50, 150, 100)  # x, y, width, height
+        self.clickable_area.setStyleSheet("""
+                    QPushButton {
+        background-color: transparent;
+        border: none;
+    }
+                """)
+        self.clickable_area.clicked.connect(self.on_rectangle_clicked)
+
+        self.text_label = QLabel(self.clickable_area)  # Now it's inside the clickable area
+        self.text_label.setText("")
+        self.text_label.setWordWrap(True)
+        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.text_label.setGeometry(0, 0, self.clickable_area.width(), self.clickable_area.height())
+        self.text_label.setStyleSheet("""
+                    background-color: transparent;
+                    color: white;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                """)
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
-        screen = QApplication.primaryScreen().availableGeometry()  # Use availableGeometry instead of geometry
+        screen = QApplication.primaryScreen().availableGeometry()
         window_rect = self.geometry()
 
         x = screen.x() + screen.width() - window_rect.width()
@@ -98,9 +104,10 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.position_text_label()
 
-
+    def on_rectangle_clicked(self):
+        print("Rectangle clicked!")
+        self.text_label.setText("You clicked the rectangle!")
 
 
 if __name__ == "__main__":
