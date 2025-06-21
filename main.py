@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
                             """)
         self.text_label.hide()
 
-        # self.setup_speech_bubble()
+        self.setup_speech_bubble()
 
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
 
@@ -199,7 +199,7 @@ class MainWindow(QMainWindow):
         self.speech_text.setText(self.speech_bubble.script[0])
         self.speech_text.setWordWrap(True)
         self.speech_text.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.speech_text.setGeometry(0, 0, self.menu_scroll.width(), self.menu_scroll.height())
+        self.speech_text.setGeometry(bubble_width // 2, bubble_height // 2, self.menu_scroll.width(), self.menu_scroll.height())
         self.speech_text.setStyleSheet("""
                                                 background-color: transparent;
                                                 color: white;
