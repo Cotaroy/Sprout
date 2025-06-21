@@ -54,7 +54,7 @@ class MenuScroll(QLabel):
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.clicked.emit()
-    
+
     def toggle_scroll(self):
         if self.open:
             self.scroll_area.hide()
@@ -62,6 +62,19 @@ class MenuScroll(QLabel):
             self.scroll_area.show()
         self.open = not self.open
 
+class EventSpeechBubble(QLabel):
+    clicked = QtCore.Signal()
+
+    def __init__(self, script, parent=None):
+        super().__init__(parent)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
+        self.script = script
+        self.curr_index = 0
+
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
+            self.clicked.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -69,7 +82,7 @@ class MainWindow(QMainWindow):
 
         # Load sprout image
         # Load and resize sprout image
-        original_pixmap = QPixmap("assets/Base_Bg.png")
+        original_pixmap = QPixmap(R("assets/Base_Bg.png"))
         scaled_width = 300  # change this as needed
         scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
 
@@ -94,7 +107,7 @@ class MainWindow(QMainWindow):
         self.move_to_bottom_right_above_taskbar()
 
         # System tray icon
-        self.tray_icon = QSystemTrayIcon(QIcon("assets/Base_Bg_Wide.png"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon(R("assets/Base_Bg_Wide.png")), self)
         tray_menu = QMenu()
 
         restore_action = QAction("Restore", self)
@@ -109,12 +122,12 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-        icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
+        icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH,
                                                                         QtCore.Qt.SmoothTransformation)
-        
+
         icon_width = icon_pixmap.width()
         icon_height = icon_pixmap.height()
-    
+
         # Center horizontally, align to bottom (10px above the edge)
         x = (self.pixmap.width() - icon_width) // 2
         y = self.pixmap.height() - icon_height
@@ -140,7 +153,10 @@ class MainWindow(QMainWindow):
                             """)
         #self.text_label.hide()
 
+        self.setup_speech_bubble()
+
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
+
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
@@ -174,14 +190,13 @@ class MainWindow(QMainWindow):
     def on_rectangle_clicked(self):
         print("Scroll clicked!")
         if not self.menu_scroll.open:
-
-            icon_pixmap = QPixmap("assets/scroll_open.png").scaledToWidth(SCROLL_WIDTH,
+            icon_pixmap = QPixmap(R("assets/scroll_open.png")).scaledToWidth(SCROLL_WIDTH,
                                                                           QtCore.Qt.SmoothTransformation)
             icon_width = icon_pixmap.width()
             icon_height = icon_pixmap.height()
 
             # Center horizontally, align to bottom (10px above the edge)
-            x = (self.pixmap.width() - icon_width) // 2 + 5
+            x = (self.pixmap.width() - icon_width) // 2
             y = self.pixmap.height() - icon_height
 
             self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
@@ -192,7 +207,7 @@ class MainWindow(QMainWindow):
 
             self.menu_scroll.open = True
         else:
-            icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
+            icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH,
                                                                             QtCore.Qt.SmoothTransformation)
             icon_width = icon_pixmap.width()
             icon_height = icon_pixmap.height()
@@ -212,6 +227,44 @@ class MainWindow(QMainWindow):
 
     def on_button_click(self, index):
         print(f"Button {index + 1} clicked!")
+
+    def setup_speech_bubble(self):
+        bubble_pixmap = QPixmap(R("assets/speech_bubble.png")).scaledToWidth(SCROLL_WIDTH,
+                                                                          QtCore.Qt.SmoothTransformation)
+
+        self.speech_bubble = EventSpeechBubble(['Hello', 'there', 'i', 'am', 'bob'], self)
+        bubble_width = bubble_pixmap.width()
+        bubble_height = bubble_pixmap.height()
+
+        # Center horizontally, align to bottom (10px above the edge)
+        x = (self.pixmap.width() - bubble_width) // 2
+        y = self.pixmap.height() - bubble_height
+        self.speech_bubble.setGeometry(x, y, bubble_width, bubble_height)
+
+        self.speech_bubble.setPixmap(bubble_pixmap)
+        self.speech_bubble.setScaledContents(True)
+
+        self.speech_text = QLabel(self.speech_bubble)
+        self.speech_text.setText(self.speech_bubble.script[0])
+        self.speech_text.setWordWrap(True)
+        self.speech_text.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.speech_text.setGeometry(bubble_width // 2, bubble_height // 2, self.menu_scroll.width(), self.menu_scroll.height())
+        self.speech_text.setStyleSheet("""
+                                                background-color: transparent;
+                                                color: white;
+                                                padding: 4px 10px;
+                                                border-radius: 6px;
+                                                font-size: 12px;
+                                            """)
+        self.speech_bubble.clicked.connect(self.on_speech_bubble_clicked)
+
+    def on_speech_bubble_clicked(self):
+        if self.speech_bubble.curr_index < len(self.speech_bubble.script) - 1:
+            self.speech_bubble.curr_index += 1
+            self.speech_text.setText(self.speech_bubble.script[self.speech_bubble.curr_index])
+        else:
+            self.speech_bubble.hide()
+
 
 if __name__ == "__main__":
     autostart.add_to_startup()
