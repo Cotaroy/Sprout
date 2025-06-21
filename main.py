@@ -1,4 +1,5 @@
 import sys
+import autostart
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QSystemTrayIcon
@@ -97,6 +98,7 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    autostart.add_to_startup()
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
