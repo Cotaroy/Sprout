@@ -1,0 +1,36 @@
+{
+    "events": [
+        {
+            "script": [
+                "a"
+            ],
+            "sprite_intro_file_location": null,
+            "sprite_outro_file_location": null,
+            "background_file_location": null
+        },
+        {
+            "script": [
+                "b"
+            ],
+            "sprite_intro_file_location": null,
+            "sprite_outro_file_location": null,
+            "background_file_location": null
+        },
+        {
+            "script": [
+                "c"
+            ],
+            "sprite_intro_file_location": null,
+            "sprite_outro_file_location": null,
+            "background_file_location": null
+        },
+        {
+            "script": [
+                "d"
+            ],
+            "sprite_intro_file_location": null,
+            "sprite_outro_file_location": null,
+            "background_file_location": null
+        }
+    ]
+}
