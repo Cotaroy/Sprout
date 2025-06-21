@@ -21,6 +21,19 @@ class MenuScroll(QLabel):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.clicked.emit()
 
+class EventSpeechBubble(QLabel):
+    clicked = QtCore.Signal()
+
+    def __init__(self, script, parent=None):
+        super().__init__(parent)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
+        self.script = script
+        self.curr_index = 0
+
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
+            self.clicked.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -98,7 +111,38 @@ class MainWindow(QMainWindow):
                             """)
         self.text_label.hide()
 
+        bubble_pixmap = QPixmap("assets/speech_bubble.png").scaledToWidth(SCROLL_WIDTH,
+                                                                        QtCore.Qt.SmoothTransformation)
+
+        self.speech_bubble = EventSpeechBubble(['Hello', 'there', 'i', 'am', 'bob'], self)
+        bubble_width = bubble_pixmap.width()
+        bubble_height = bubble_pixmap.height()
+
+        # Center horizontally, align to bottom (10px above the edge)
+        x = (self.pixmap.width() - bubble_width) // 2
+        y = self.pixmap.height() - bubble_height
+
+        self.speech_bubble.setGeometry(x, y, bubble_width, bubble_height)
+
+        self.speech_bubble.setPixmap(bubble_pixmap)
+        self.speech_bubble.setScaledContents(True)
+
+        self.speech_text = QLabel(self.speech_bubble)
+        self.speech_text.setText(self.speech_bubble.script[0])
+        self.speech_text.setWordWrap(True)
+        self.speech_text.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.speech_text.setGeometry(0, 0, self.menu_scroll.width(), self.menu_scroll.height())
+        self.speech_text.setStyleSheet("""
+                                        background-color: transparent;
+                                        color: white;
+                                        padding: 4px 10px;
+                                        border-radius: 6px;
+                                        font-size: 12px;
+                                    """)
+        # self.speech_text.show()
+
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
+        self.speech_bubble.clicked.connect(self.on_speech_bubble_clicked)
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
@@ -162,6 +206,13 @@ class MainWindow(QMainWindow):
             self.menu_scroll.setScaledContents(True)
 
             self.menu_scroll.open = False
+
+    def on_speech_bubble_clicked(self):
+        if self.speech_bubble.curr_index < len(self.speech_bubble.script) - 1:
+            self.speech_bubble.curr_index += 1
+            self.speech_text.setText(self.speech_bubble.script[self.speech_bubble.curr_index])
+        else:
+            self.speech_bubble.hide()
 
 
 if __name__ == "__main__":
