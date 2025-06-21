@@ -132,8 +132,6 @@ class MainWindow(QMainWindow):
             self.menu_scroll.move(self.menu_scroll.x(), self.menu_scroll.y() + change)
             self.menu_scroll.open = False
 
-
-
 if __name__ == "__main__":
     autostart.add_to_startup()
     app = QApplication(sys.argv)
