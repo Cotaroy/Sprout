@@ -14,8 +14,11 @@ class MainWindow(QMainWindow):
         self.image_label.setPixmap(self.pixmap)
         self.setCentralWidget(self.image_label)
 
-        # Overlay text box
-        self.text_label = QLabel("Hello from Sprout!", self)
+        self.text_label = QLabel(self)
+        self.text_label.setText("This is a long message that should wrap into multiple lines properly.")
+        self.text_label.setWordWrap(True)
+        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.text_label.setFixedWidth(self.pixmap.width())
         self.text_label.setStyleSheet("""
             background-color: rgba(0, 0, 0, 180);
             color: white;
@@ -23,8 +26,6 @@ class MainWindow(QMainWindow):
             border-radius: 6px;
             font-size: 12px;
         """)
-        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.text_label.setFixedHeight(28)
 
         # Window appearance
         self.setWindowFlags(
@@ -59,16 +60,19 @@ class MainWindow(QMainWindow):
         self.show()
 
     def position_text_label(self):
-        """Place text box at the bottom of the image."""
-        label_width = self.pixmap.width()
+        """Place text box at the bottom of the image, adjusting height dynamically."""
+        self.text_label.adjustSize()
         label_height = self.text_label.height()
-        self.text_label.setGeometry(0, self.pixmap.height() - label_height, label_width, label_height)
+        self.text_label.setGeometry(0, self.pixmap.height() - label_height, self.pixmap.width(), label_height)
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
-        available = QApplication.primaryScreen().availableGeometry()
-        x = available.x() + available.width() - self.width()
-        y = available.y() + available.height() - self.height()
+        screen = QApplication.primaryScreen().availableGeometry()  # Use availableGeometry instead of geometry
+        window_rect = self.geometry()
+
+        x = screen.x() + screen.width() - window_rect.width()
+        y = screen.y() + screen.height() - window_rect.height()
+
         self.move(x, y)
 
     def contextMenuEvent(self, event):
@@ -88,6 +92,8 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.position_text_label()
+
+
 
 
 if __name__ == "__main__":
