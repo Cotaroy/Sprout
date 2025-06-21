@@ -5,6 +5,17 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon
 
+class MenuScroll(QLabel):
+    clicked = QtCore.Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
+        self.open = False
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
+            self.clicked.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,8 +41,6 @@ class MainWindow(QMainWindow):
         )
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
 
-
-
         # Resize and position
         self.resize(self.pixmap.size())
         self.move_to_bottom_right_above_taskbar()
@@ -52,29 +61,36 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-        # Clickable transparent rectangle
-        self.clickable_area = QPushButton(self)
-        self.clickable_area.setGeometry(50, 50, 150, 100)  # x, y, width, height
-        self.clickable_area.setStyleSheet("""
-                    QPushButton {
-        background-color: transparent;
-        border: none;
-    }
-                """)
-        self.clickable_area.clicked.connect(self.on_rectangle_clicked)
+        self.menu_scroll = MenuScroll(self)
+        icon_width = 150
+        icon_height = 100
 
-        self.text_label = QLabel(self.clickable_area)  # Now it's inside the clickable area
-        self.text_label.setText("")
-        self.text_label.setWordWrap(True)
-        self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.text_label.setGeometry(0, 0, self.clickable_area.width(), self.clickable_area.height())
-        self.text_label.setStyleSheet("""
-                    background-color: transparent;
-                    color: white;
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    font-size: 12px;
-                """)
+        # Center horizontally, align to bottom (10px above the edge)
+        x = (self.pixmap.width() - icon_width) // 2
+        y = self.pixmap.height() - icon_height
+
+        self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
+
+        icon_pixmap = QPixmap("assets/Base_Bg.png").scaled(150, 100, QtCore.Qt.KeepAspectRatio,
+                                                        QtCore.Qt.SmoothTransformation)
+
+        self.menu_scroll.setPixmap(icon_pixmap)
+        self.menu_scroll.setScaledContents(True)
+
+        self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
+
+        # self.text_label = QLabel(self.menu_scroll)
+        # self.text_label.setText("")
+        # self.text_label.setWordWrap(True)
+        # self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
+        # self.text_label.setGeometry(0, 0, self.menu_scroll.width(), self.menu_scroll.height())
+        # self.text_label.setStyleSheet("""
+        #     background-color: transparent;
+        #     color: white;
+        #     padding: 4px 10px;
+        #     border-radius: 6px;
+        #     font-size: 12px;
+        # """)
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
@@ -106,8 +122,15 @@ class MainWindow(QMainWindow):
         super().resizeEvent(event)
 
     def on_rectangle_clicked(self):
-        print("Rectangle clicked!")
-        self.text_label.setText("You clicked the rectangle!")
+        print("Scroll clicked!")
+        change = 80
+        if not self.menu_scroll.open:
+            self.menu_scroll.move(self.menu_scroll.x(), self.menu_scroll.y() - change)
+            self.menu_scroll.open = True
+        else:
+            self.menu_scroll.move(self.menu_scroll.x(), self.menu_scroll.y() + change)
+            self.menu_scroll.open = False
+
 
 
 if __name__ == "__main__":
