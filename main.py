@@ -6,6 +6,8 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon
 
+SCROLL_WIDTH = 250
+
 class MenuScroll(QLabel):
     clicked = QtCore.Signal()
 
@@ -64,7 +66,7 @@ class MainWindow(QMainWindow):
         self.tray_icon.setToolTip("Sprout App")
         self.tray_icon.show()
 
-        icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(200,
+        icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
                                                           QtCore.Qt.SmoothTransformation)
 
         self.menu_scroll = MenuScroll(self)
@@ -97,19 +99,6 @@ class MainWindow(QMainWindow):
 
         self.menu_scroll.clicked.connect(self.on_rectangle_clicked)
 
-        # self.text_label = QLabel(self.menu_scroll)
-        # self.text_label.setText("")
-        # self.text_label.setWordWrap(True)
-        # self.text_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        # self.text_label.setGeometry(0, 0, self.menu_scroll.width(), self.menu_scroll.height())
-        # self.text_label.setStyleSheet("""
-        #     background-color: transparent;
-        #     color: white;
-        #     padding: 4px 10px;
-        #     border-radius: 6px;
-        #     font-size: 12px;
-        # """)
-
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
         screen = QApplication.primaryScreen().availableGeometry()
@@ -141,12 +130,36 @@ class MainWindow(QMainWindow):
 
     def on_rectangle_clicked(self):
         print("Scroll clicked!")
-        change = 80
         if not self.menu_scroll.open:
-            self.menu_scroll.move(self.menu_scroll.x(), self.menu_scroll.y() - change)
+            icon_pixmap = QPixmap("assets/scroll_open.png").scaledToWidth(SCROLL_WIDTH,
+                                                                            QtCore.Qt.SmoothTransformation)
+            icon_width = icon_pixmap.width()
+            icon_height = icon_pixmap.height()
+
+            # Center horizontally, align to bottom (10px above the edge)
+            x = (self.pixmap.width() - icon_width) // 2
+            y = self.pixmap.height() - icon_height
+
+            self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
+            self.menu_scroll.setPixmap(icon_pixmap)
+            self.menu_scroll.setScaledContents(True)
+
             self.menu_scroll.open = True
         else:
-            self.menu_scroll.move(self.menu_scroll.x(), self.menu_scroll.y() + change)
+            icon_pixmap = QPixmap("assets/scroll_closed.png").scaledToWidth(SCROLL_WIDTH,
+                                                                            QtCore.Qt.SmoothTransformation)
+            icon_width = icon_pixmap.width()
+            icon_height = icon_pixmap.height()
+
+            # Center horizontally, align to bottom (10px above the edge)
+            x = (self.pixmap.width() - icon_width) // 2
+            y = self.pixmap.height() - icon_height
+
+            self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
+
+            self.menu_scroll.setPixmap(icon_pixmap)
+            self.menu_scroll.setScaledContents(True)
+
             self.menu_scroll.open = False
 
 
