@@ -110,7 +110,9 @@ class MenuScroll(QLabel):
         print(f"Checkbox for task {index} changed to state {state}")
         if state == 2:
             self.checkmarked_indices.append(index)
-            print(self.checkmarked_indices)
+        if state == 0:
+            if index in self.checkmarked_indices:
+                self.checkmarked_indices.remove(index)
 
 class EventSpeechBubble(QLabel):
     clicked = QtCore.Signal()
