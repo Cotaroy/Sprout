@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         pixmap = QtGui.QPixmap("sprout.png")
-        print(pixmap)
+        # print(pixmap)
         label = QLabel(self)
         label.setPixmap(pixmap)
         self.setCentralWidget(label)
@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
 
         self.move(x, y)
 
-    def contextMenuEvent(self, event):
+    def contextMenuEvent(self, event): # context is opened by right-click
         menu = QMenu(self)
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(QApplication.quit)
@@ -52,4 +52,4 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
-    app.exec()
+    app.e
