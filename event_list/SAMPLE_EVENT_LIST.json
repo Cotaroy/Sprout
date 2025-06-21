@@ -1,0 +1,14 @@
+{
+    "events": [
+        {
+            "script": [
+                "hello there traveller", "its been a long time since i last saw you"
+            ],
+            "sprite_intro_file_location": "sample_intro.gif",
+            "sprite_idle_file_location": "sample_idle.gif",
+            "sprite_outro_file_location": "sample_outro.png",
+            "text_box_file_location": "sample_text_box.png",
+            "background_file_location": null
+        }
+    ]
+}

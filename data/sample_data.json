@@ -1,0 +1,12 @@
+{
+    "streaks": 0,
+    "finished_task_today": false,
+    "tasks": [
+        {
+            "description": "say hello to the neighbours",
+            "deadline": "2025-06-21"
+        }
+    ],
+    "finished_tasks": [],
+    "finished_tutorial": false
+}
