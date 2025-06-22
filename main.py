@@ -1,3 +1,7 @@
+#############################################################################################
+# TESTING_STREAK_NUMBER_CHANGE is a global variable use it to change how fast the tree grows
+#############################################################################################
+
 import sys
 import autostart
 from checklist import MenuScroll
