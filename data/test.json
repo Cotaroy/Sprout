@@ -1,6 +1,6 @@
 {
-    "streaks": 30,
-    "event_index": 1,
+    "streaks": 31,
+    "event_index": 2,
     "finished_task_today": false,
     "tasks": [
         {
@@ -41,6 +41,10 @@
         },
         {
             "description": "k",
+            "deadline": "2025-06-01"
+        },
+        {
+            "description": "Task Title",
             "deadline": "2025-06-01"
         }
     ],

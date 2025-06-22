@@ -229,6 +229,8 @@ class MainWindow(QMainWindow):
         self.movie.frameChanged.connect(self._on_gif_frame_changed)
         self.movie.start()
 
+
+#TODO women done walking in and stands still
     def set_stand_still_png(self):
         if hasattr(self, 'gif_label'):
             self.gif_label.setMovie(None)
@@ -324,6 +326,7 @@ class MainWindow(QMainWindow):
                 # After bubble is done, wait 0.3s then play walking_out.gif
                 QtCore.QTimer.singleShot(300, self.play_walking_out_gif)
 
+# TODO
     def _start_typewriter_animation(self, full_text):
         # Cancel any previous animation
         if hasattr(self, '_typewriter_timer') and self._typewriter_timer is not None:
