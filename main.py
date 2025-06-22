@@ -269,7 +269,7 @@ class MainWindow(QMainWindow):
                                             """)
         self.speech_bubble.clicked.connect(self.on_speech_bubble_clicked)
 
-    def on_speech_bubble_clicked(self):
+    def on_speech_bubble_clicked(self, event):
         if self.speech_bubble.curr_index < len(self.speech_bubble.script) - 1:
             self.speech_bubble.curr_index += 1
             self.speech_text.setText(self.speech_bubble.script[self.speech_bubble.curr_index])
@@ -327,7 +327,8 @@ class MainWindow(QMainWindow):
         # If a text bubble already exists, just update the text
         if hasattr(self, 'text_bubble_label') and self.text_bubble_label.isVisible():
             if hasattr(self, 'text_bubble_text'):
-                self.text_bubble_text.setText(text)
+                self.text_bubble_text.setText("")
+                self._start_typewriter_animation(text)
             else:
                 # Fallback: recreate text label if missing
                 bubble_width = self.text_bubble_label.width()
@@ -335,12 +336,13 @@ class MainWindow(QMainWindow):
                 margin_x = int(bubble_width * 0.18)
                 margin_y = 20
                 self.text_bubble_text = QLabel(self.text_bubble_label)
-                self.text_bubble_text.setText(text)
+                self.text_bubble_text.setText("")
                 self.text_bubble_text.setWordWrap(True)
                 self.text_bubble_text.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 self.text_bubble_text.setGeometry(margin_x, margin_y, bubble_width - 2 * margin_x, bubble_height - 2 * margin_y)
                 self.text_bubble_text.setStyleSheet("background: transparent; color: black; font-size: 16px; padding: 4px;")
                 self.text_bubble_text.show()
+                self._start_typewriter_animation(text)
             return
         # Otherwise, create a new text bubble
         if hasattr(self, 'text_bubble_label'):
@@ -361,7 +363,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'text_bubble_text'):
             self.text_bubble_text.deleteLater()
         self.text_bubble_text = QLabel(self.text_bubble_label)
-        self.text_bubble_text.setText(text)
+        self.text_bubble_text.setText("")
         self.text_bubble_text.setWordWrap(True)
         self.text_bubble_text.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         margin_x = int(bubble_width * 0.18)
@@ -371,17 +373,43 @@ class MainWindow(QMainWindow):
         self.text_bubble_text.show()
         # Make bubble clickable for next message
         self.text_bubble_label.mousePressEvent = self._on_text_bubble_clicked
+        self._start_typewriter_animation(text)
 
     def _on_text_bubble_clicked(self, event):
-        # Advance to the next message or hide if at the end
-        if self.speech_bubble.curr_index < len(self.speech_bubble.script) - 1:
-            self.speech_bubble.curr_index += 1
-            self.text_bubble_text.setText(self.speech_bubble.script[self.speech_bubble.curr_index])
+        # If animation is running, finish instantly
+        if hasattr(self, '_typewriter_timer') and self._typewriter_timer.isActive() and self._typewriter_index <= len(self._typewriter_text):
+            self._typewriter_timer.stop()
+            self.text_bubble_text.setText(self._typewriter_text)
         else:
-            self.speech_bubble.hide()
-            self.text_bubble_label.hide()
-            # After bubble is done, wait 0.3s then play walking_out.gif
-            QtCore.QTimer.singleShot(300, self.play_walking_out_gif)
+            # Advance to next message or hide if at the end
+            if self.speech_bubble.curr_index < len(self.speech_bubble.script) - 1:
+                self.speech_bubble.curr_index += 1
+                next_text = self.speech_bubble.script[self.speech_bubble.curr_index]
+                self.text_bubble_text.setText("")
+                self._start_typewriter_animation(next_text)
+            else:
+                self.speech_bubble.hide()
+                self.text_bubble_label.hide()
+                # After bubble is done, wait 0.3s then play walking_out.gif
+                QtCore.QTimer.singleShot(300, self.play_walking_out_gif)
+
+    def _start_typewriter_animation(self, full_text):
+        # Cancel any previous animation
+        if hasattr(self, '_typewriter_timer') and self._typewriter_timer is not None:
+            self._typewriter_timer.stop()
+            self._typewriter_timer.deleteLater()
+        self._typewriter_index = 0
+        self._typewriter_text = full_text
+        self._typewriter_timer = QtCore.QTimer(self)
+        self._typewriter_timer.timeout.connect(self._update_typewriter_text)
+        self._typewriter_timer.start(25)  # Adjust speed here (ms per character)
+
+    def _update_typewriter_text(self):
+        if self._typewriter_index <= len(self._typewriter_text):
+            self.text_bubble_text.setText(self._typewriter_text[:self._typewriter_index])
+            self._typewriter_index += 1
+        else:
+            self._typewriter_timer.stop()
 
     def play_walking_out_gif(self):
         # Play walking_out.gif at the same position as the sprout
