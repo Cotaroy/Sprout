@@ -1,6 +1,3 @@
-#############################################################################################
-# TESTING_STREAK_NUMBER_CHANGE is a global variable use it to change how fast the tree grows
-#############################################################################################
 
 import sys
 import autostart
@@ -17,7 +14,6 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushBut
 from user import run_at_midnight
 
 SCROLL_WIDTH = 250
-TESTING_STREAK_NUMBER_CHANGE = 1
 
 class EventSpeechBubble(QLabel):
     clicked = QtCore.Signal()
@@ -156,9 +152,6 @@ class MainWindow(QMainWindow):
         self.set_background()
         self.menu_scroll.toggle_scroll()
         self.sfx_player.play_sfx(R("assets/audio/sfx/scroll.mp3"))
-
-        self.user.streaks += TESTING_STREAK_NUMBER_CHANGE
-        self.menu_scroll.update_subtitle()
 
     def choose_background(self):
         if self.user.streaks >= 20:
