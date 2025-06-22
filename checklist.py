@@ -178,8 +178,8 @@ class MenuScroll(QLabel):
                     self.user.complete_task(i)
                     self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
                     print('task done')
-            if not self.user.finished_task_today and self.checkmarked_indices != []:
-                self.update_subtitle()
+
+            self.update_subtitle()
             # Clear the checkmarked indices after processing
             self.checkmarked_indices = []
             save_user(self.user, R('data/user.json'))
@@ -201,12 +201,12 @@ class MenuScroll(QLabel):
         scroll_content = QWidget()
         scroll_layout = QVBoxLayout(scroll_content)
         scroll_layout.setContentsMargins(16, 0, 16, 0)  # Indent left and right
-        
+
         for i in range(len(self.user.tasks)):
             self.load_task(i, scroll_layout)
-         
+
         self.create_task_button(scroll_layout)
-        scroll_layout.addStretch()  # Push tasks to the top if few   
+        scroll_layout.addStretch()  # Push tasks to the top if few
         self.scroll_area.setWidget(scroll_content)
         self.scroll_area.hide()
 
@@ -489,7 +489,7 @@ class MenuScroll(QLabel):
 
             # --- ADD THE TASK CREATION BUTTON BACK AT THE END ---
             self.create_task_button(layout)
-            layout.addStretch() 
+            layout.addStretch()
 
         button.clicked.connect(on_button_clicked)
         cancel_button.clicked.connect(on_cancel_clicked)
@@ -517,7 +517,8 @@ class MenuScroll(QLabel):
         if not self.user.finished_task_today and self.checkmarked_indices != []:
                 self.update_subtitle()
         self.checkmarked_indices = []
-       
+        save_user(self.user, R('data/user.json'))
+
         while self.history_scroll_layout.count():
             item = self.history_scroll_layout.takeAt(0)
             widget = item.widget()
@@ -534,7 +535,7 @@ class MenuScroll(QLabel):
                 self.load_finished_task(i, self.history_scroll_layout)
 
         self.change_title("History")
-        
+
         self.history_scroll_layout.addStretch()
 
     def update_active_tasks(self):
@@ -553,7 +554,7 @@ class MenuScroll(QLabel):
 
         # Add creation button
         self.create_task_button(self.scroll_layout)
-        self.scroll_layout.addStretch() 
+        self.scroll_layout.addStretch()
 
         # Attach new scroll content
         self.scroll_area.setWidget(self.scroll_content)
@@ -561,7 +562,7 @@ class MenuScroll(QLabel):
         self.change_title("To-Do List")
 
         self.scroll_area.show()
-    
+
     def title(self, string: str = "Title"):
         self.title = QLabel(string)
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)

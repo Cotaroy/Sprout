@@ -129,12 +129,14 @@ class MainWindow(QMainWindow):
                 self.set_background()
                 print(f"Streaks updated to: {self.user.streaks}")
                 self.menu_scroll.update_subtitle()
+                save_user(self.user, R(USER_DATA_FILE))
                 return
 
         self.user.streaks = 14
         self.set_background()
         print(f"Streaks updated to: {self.user.streaks}")
         self.menu_scroll.update_subtitle()
+        save_user(self.user, R(USER_DATA_FILE))
 
     def right_arrow_key_pressed_event(self, event):
         boundaries = [2, 4, 7, 14, 20]
@@ -144,11 +146,13 @@ class MainWindow(QMainWindow):
                 self.set_background()
                 print(f"Streaks updated to: {self.user.streaks}")
                 self.menu_scroll.update_subtitle()
+                save_user(self.user, R(USER_DATA_FILE))
                 return
         self.user.streaks = 2
         self.set_background()
         print(f"Streaks updated to: {self.user.streaks}")
         self.menu_scroll.update_subtitle()
+        save_user(self.user, R(USER_DATA_FILE))
 
     def midnight_update(self):
         self.menu_scroll.update_subtitle()
@@ -250,8 +254,8 @@ class MainWindow(QMainWindow):
         """Reset user data to default."""
         self.user = load_user(DEFAULT_DATA_FILE)
         save_user(self.user, R(USER_DATA_FILE))
-        self.menu_scroll.update_subtitle()
         self.menu_scroll.update_menu()
+        self.menu_scroll.update_subtitle()
         self.set_background()
         print("Data reset to default.")
 
