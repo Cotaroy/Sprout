@@ -1,4 +1,4 @@
-from user import User, run_at_midnight
+
 from saveload import load_user
 from pathretriever import R
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -11,12 +11,10 @@ SCROLL_WIDTH = 250
 class MenuScroll(QLabel):
     clicked = QtCore.Signal()
 
-    def __init__(self, x, y, width, height, parent=None):
+    def __init__(self, user, x, y, width, height, parent=None):
         super().__init__(parent)
 
-        self.user = load_user('data/test.json')
-
-        run_at_midnight(self.user.check_streak)
+        self.user = user
 
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
         self.open = False
@@ -86,6 +84,7 @@ class MenuScroll(QLabel):
             self.setScaledContents(True)
             self.scroll_area.hide()
             self.open = False
+
 
     def update_menu(self):
         """Update the menu items based on the user's tasks using load_task()."""

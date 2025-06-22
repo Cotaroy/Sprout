@@ -1,13 +1,16 @@
 import sys
 import autostart
-import checklist
+from checklist import MenuScroll
 from saveload import load_user
+
 
 from event import Event
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QPixmap, QAction, QIcon, QFontDatabase, QFont
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon, QWidget, QScrollArea, QVBoxLayout, QSizePolicy
+
+from user import run_at_midnight
 
 SCROLL_WIDTH = 250
 
@@ -29,16 +32,13 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.user = load_user('data/test.json')
+        print(self.user.streaks)
+
         # Load sprout image
         # Load and resize sprout image
-        original_pixmap = QPixmap(R("assets/Base_Bg.png"))
-        scaled_width = 300  # change this as needed
-        scaled_pixmap = original_pixmap.scaledToWidth(scaled_width, QtCore.Qt.TransformationMode.SmoothTransformation)
-
-        self.pixmap = scaled_pixmap
         self.image_label = QLabel(self)
-        self.image_label.setPixmap(self.pixmap)
-        self.image_label.setFixedSize(self.pixmap.size())  # Ensures the full image is visible
+        self.set_background()
 
         # Window appearance
         self.setWindowFlags(
@@ -79,7 +79,9 @@ class MainWindow(QMainWindow):
         x = (self.pixmap.width() - icon_width) // 2
         y = self.pixmap.height() - icon_height
 
-        self.menu_scroll = checklist.MenuScroll(x, y, icon_width, icon_height, self)
+        self.menu_scroll = MenuScroll(self.user, x, y, icon_width, icon_height, self)
+
+        run_at_midnight(self.user.check_streak)
 
         self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
 
@@ -89,8 +91,35 @@ class MainWindow(QMainWindow):
         self.setup_speech_bubble()
         self.speech_bubble.hide()
 
-        self.menu_scroll.clicked.connect(self.menu_scroll.toggle_scroll)
+        self.menu_scroll.clicked.connect(self.change_background_on_toggle)
 
+    def change_background_on_toggle(self):
+        self.set_background()
+        self.menu_scroll.toggle_scroll()
+
+    def choose_background(self):
+        if self.user.streaks >= 22:
+            return 'Base_Bg5.png'
+        elif self.user.streaks >= 15:
+            return 'Base_Bg4.png'
+        elif self.user.streaks >= 9:
+            return 'Base_Bg3.png'
+        elif self.user.streaks >= 5:
+            return 'Base_Bg2.png'
+        elif self.user.streaks >= 3:
+            return 'Base_Bg1.png'
+        else:
+            return 'Base_Bg.png'
+
+    def set_background(self):
+        original_pixmap = QPixmap(R(f"assets/{self.choose_background()}"))
+        scaled_width = 300
+        scaled_pixmap = original_pixmap.scaledToWidth(scaled_width,
+                                                      QtCore.Qt.TransformationMode.SmoothTransformation)
+        self.pixmap = scaled_pixmap
+        self.image_label.setPixmap(self.pixmap)
+        self.image_label.setFixedSize(self.pixmap.size())
+        self.image_label.lower()
 
     def move_to_bottom_right_above_taskbar(self):
         """Move window to bottom-right corner, above taskbar."""
@@ -165,7 +194,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     autostart.add_to_startup()
     app = QApplication(sys.argv)
-    
+
     font_id = QFontDatabase.addApplicationFont(R("assets/font/BlueScreenPersonalUseRegular-0W1M9.ttf"))
     if font_id == -1:
         print("Failed to load font")

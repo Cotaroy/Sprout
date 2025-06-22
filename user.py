@@ -15,6 +15,7 @@ def run_at_midnight(func):
     threading.Thread(target=schedule, daemon=True).start()
 
 
+
 @dataclass
 class User:
     streaks: int = 0
@@ -27,6 +28,7 @@ class User:
     def check_streak(self):
         if not self.finished_task_today and self.streaks > 0:
             self.streaks -= 1
+
 
     def to_dict(self):
         tasks = [task.to_dict() for task in self.tasks]
