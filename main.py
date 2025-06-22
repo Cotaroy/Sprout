@@ -1,7 +1,7 @@
 
 import sys
 
-from PyQt6.QtGui import QCursor
+from PySide6.QtGui import QCursor
 
 import autostart
 from checklist import MenuScroll
