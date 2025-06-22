@@ -502,10 +502,12 @@ class MenuScroll(QLabel):
         self.stacked.setCurrentIndex(1)
         self.update_finished_tasks()  # ← reload history scroll layout
         self.update_menu()
+        self.update_subtitle()
 
     def switch_to_main(self):
         self.update_active_tasks()  # ← rebuild content
         self.stacked.setCurrentIndex(0)
+        self.update_subtitle()
 
     def update_finished_tasks(self):
         # Clear the layout of finished tasks
