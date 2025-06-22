@@ -6,13 +6,14 @@ from saveload import load_user
 
 from event import Event
 from pathretriever import R
-from PySide6 import QtWidgets, QtCore, QtGui,  QMovie
-from PySide6.QtGui import QPixmap, QAction, QIcon
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QAction, QIcon, QMovie
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon, QWidget, QScrollArea, QVBoxLayout, QSizePolicy
 
 from user import run_at_midnight
 
 SCROLL_WIDTH = 250
+TESTING_STREAK_NUMBER_CHANGE = 1
 
 class EventSpeechBubble(QLabel):
     clicked = QtCore.Signal()
@@ -109,7 +110,7 @@ class MainWindow(QMainWindow):
     def change_background_on_toggle(self):
         self.set_background()
         self.menu_scroll.toggle_scroll()
-        self.user.streaks += 2
+        self.user.streaks += TESTING_STREAK_NUMBER_CHANGE
 
     def choose_background(self):
         if self.user.streaks >= 22:
