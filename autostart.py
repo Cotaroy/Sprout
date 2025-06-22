@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-def add_to_startup(app_name="Cornerpond", exe_path=None):
+def add_to_startup(app_name="Sprout", exe_path=None):
     if exe_path is None:
         exe_path = sys.executable  # This points to the .exe if bundled with PyInstaller
 
