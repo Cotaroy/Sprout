@@ -8,6 +8,7 @@ from PySide6.QtCore import Qt, QRect, QDate
 from PySide6.QtWidgets import QLabel, QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QFrame, QCheckBox, QHBoxLayout, QPushButton, QLineEdit, QFormLayout, QComboBox
 
 from user import Task
+from audio_player import AudioPlayer
 
 SCROLL_WIDTH = 250
 
@@ -18,6 +19,7 @@ class MenuScroll(QLabel):
         super().__init__(parent)
 
         self.user = user
+        self.sfx_player = AudioPlayer()
 
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
         self.open = False
@@ -107,6 +109,7 @@ class MenuScroll(QLabel):
         print(f"Checkbox for task {index} changed to state {state}")
         if state == 2:
             self.checkmarked_indices.append(index)
+            self.sfx_player.play_sfx(R("assets/audio/sfx/Amethyst_step1.ogg"))
         if state == 0:
             if index in self.checkmarked_indices:
                 self.checkmarked_indices.remove(index)

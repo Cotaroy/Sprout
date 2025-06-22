@@ -1,13 +1,20 @@
+#############################################################################################
+# TESTING_STREAK_NUMBER_CHANGE is a global variable use it to change how fast the tree grows
+#############################################################################################
+
 import sys
 import autostart
 from checklist import MenuScroll
 from saveload import load_user, save_user
+import audio_player
 
 from event import load_event_list
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QAction, QIcon, QMovie
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon, QWidget, QScrollArea, QVBoxLayout, QSizePolicy
+
+from PyQt6.QtMultimedia import QMediaDevices
 
 from user import run_at_midnight
 
@@ -32,8 +39,14 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.hidden = False
+
         self.user = load_user('data/test.json')
         print(self.user.streaks)
+
+        # AUDIO
+        self.sfx_player = audio_player.AudioPlayer()
+        self.bgm_player = audio_player.AudioPlayer()
 
         # Load sprout image
         # Load and resize sprout image
@@ -111,6 +124,8 @@ class MainWindow(QMainWindow):
     def change_background_on_toggle(self):
         self.set_background()
         self.menu_scroll.toggle_scroll()
+        self.sfx_player.play_sfx(R("assets/audio/sfx/scroll.mp3"))
+
         self.user.streaks += TESTING_STREAK_NUMBER_CHANGE
 
     def choose_background(self):
@@ -152,6 +167,7 @@ class MainWindow(QMainWindow):
 
         hide_action = QAction("Hide to Tray", self)
         hide_action.triggered.connect(self.hide)
+        self.hidden = True
 
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(QApplication.quit)
@@ -229,8 +245,7 @@ class MainWindow(QMainWindow):
         self.movie.frameChanged.connect(self._on_gif_frame_changed)
         self.movie.start()
 
-
-#TODO women done walking in and stands still
+# TODO
     def set_stand_still_png(self):
         if hasattr(self, 'gif_label'):
             self.gif_label.setMovie(None)
@@ -312,6 +327,7 @@ class MainWindow(QMainWindow):
         # If animation is running, finish instantly
         if hasattr(self, '_typewriter_timer') and self._typewriter_timer.isActive() and self._typewriter_index <= len(self._typewriter_text):
             self._typewriter_timer.stop()
+            self.sfx_player.stop()
             self.text_bubble_text.setText(self._typewriter_text)
         else:
             # Advance to next message or hide if at the end
@@ -326,7 +342,6 @@ class MainWindow(QMainWindow):
                 # After bubble is done, wait 0.3s then play walking_out.gif
                 QtCore.QTimer.singleShot(300, self.play_walking_out_gif)
 
-# TODO
     def _start_typewriter_animation(self, full_text):
         # Cancel any previous animation
         if hasattr(self, '_typewriter_timer') and self._typewriter_timer is not None:
@@ -337,12 +352,14 @@ class MainWindow(QMainWindow):
         self._typewriter_timer = QtCore.QTimer(self)
         self._typewriter_timer.timeout.connect(self._update_typewriter_text)
         self._typewriter_timer.start(25)  # Adjust speed here (ms per character)
+        self.sfx_player.play_sfx(R("assets/audio/sfx/irene.mp3"))  # Play sound effect for 2 seconds
 
     def _update_typewriter_text(self):
         if self._typewriter_index <= len(self._typewriter_text):
             self.text_bubble_text.setText(self._typewriter_text[:self._typewriter_index])
             self._typewriter_index += 1
         else:
+            self.sfx_player.stop()
             self._typewriter_timer.stop()
 
     def play_walking_out_gif(self):
@@ -392,7 +409,23 @@ if __name__ == "__main__":
     else:
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         app.setFont(QFont(font_family, 14))  # Set globally
+
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
+
+    bgm_player = audio_player.AudioPlayer()
+    if window.user.streaks >= 22:
+            bgm_player.play_bg_track(R("assets/audio/bgm/bigbig_tree_track.mp3"))
+    elif window.user.streaks >= 15:
+        bgm_player.play_bg_track(R("assets/audio/bgm/big_tree.mp3"))
+    elif window.user.streaks >= 9:
+        bgm_player.play_bg_track(R("assets/audio/bgm/mid_tree.mp3"))
+    elif window.user.streaks >= 5:
+        bgm_player.play_bg_track(R("assets/audio/bgm/tree_teen.mp3"))
+    elif window.user.streaks >= 3:
+        bgm_player.play_bg_track(R("assets/audio/bgm/sprout.mp3"))
+    else:
+        bgm_player.play_bg_track(R("assets/audio/bgm/brown_noise.mp3"))
+
     window.show()
     sys.exit(app.exec())
