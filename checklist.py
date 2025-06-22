@@ -34,11 +34,11 @@ class MenuScroll(QLabel):
 
         # Scroll area setup (child of the label)
         self.scroll_area = QScrollArea(self)
-        self.scroll_area.setGeometry(x, 55, width-35, height*4) #border: none;
+        self.scroll_area.setGeometry(x, 55, width-35, height*4)
         self.scroll_area.setStyleSheet("""
             QScrollArea {
                 background-color: transparent;
-                
+                border: none;
             }
             QScrollArea QWidget {
                 background-color: transparent;
@@ -113,7 +113,7 @@ class MenuScroll(QLabel):
         # Content inside the scroll area
         history_scroll_content = QWidget()
         self.history_scroll_layout = QVBoxLayout(history_scroll_content)
-        self.history_scroll_layout.setContentsMargins(0, 0, 0, 0)
+        self.history_scroll_layout.setContentsMargins(16, 0, 16, 0)  # Indent left and right
 
         # Add each finished task as its own widget
         for i in range(len(self.user.finished_tasks)):
@@ -180,13 +180,11 @@ class MenuScroll(QLabel):
         """Update the menu items based on the user's tasks using load_task()."""
         scroll_content = QWidget()
         scroll_layout = QVBoxLayout(scroll_content)
-
+        scroll_layout.setContentsMargins(16, 0, 16, 0)  # Indent left and right
         for i in range(len(self.user.tasks)):
             self.load_task(i, scroll_layout)
-
         self.create_task_button(scroll_layout)
         scroll_layout.addStretch()  # Push tasks to the top if few
-
         self.scroll_area.setWidget(scroll_content)
         self.scroll_area.hide()
 
@@ -378,7 +376,22 @@ class MenuScroll(QLabel):
         container_layout.setContentsMargins(0, 0, 0, 0)
 
         # Button
-        button = QPushButton("Task Button")
+        button = QPushButton("Add Task")
+        button.setStyleSheet("""
+            QPushButton {
+                background-color: #6b4e3d;  /* fill */
+                color: #ffffff;             /* text color */
+                border: 1px solid #6b4e3d;  /* border */
+                border-radius: 4px;         /* rounded corners */
+                padding: 4px 8px;           /* inside spacing */
+            }
+            QPushButton:hover {
+                background-color: #5c4538;  /* hover state */
+            }
+            QPushButton:pressed {
+                background-color: #5c4538;  /* click state */
+            }
+        """)
         container_layout.addWidget(button)
 
         # Replacement layout content (hidden initially)
@@ -473,15 +486,21 @@ class MenuScroll(QLabel):
             widget = item.widget()
             if widget is not None:
                 widget.setParent(None)
-
-        for i in range(len(self.user.finished_tasks)):
-            self.load_finished_task(i, self.history_scroll_layout)
+        if len(self.user.finished_tasks) == 0:
+            empty_label = QLabel("No finished tasks yet! Complete some tasks to see them here.")
+            empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            empty_label.setWordWrap(True)
+            empty_label.setStyleSheet("color: #aaa; font-style: italic; padding: 12px;")
+            self.history_scroll_layout.addWidget(empty_label)
+        else:
+            for i in range(len(self.user.finished_tasks)):
+                self.load_finished_task(i, self.history_scroll_layout)
 
     def update_active_tasks(self):
         # Create new scroll content and layout
         new_scroll_content = QWidget()
         new_scroll_layout = QVBoxLayout(new_scroll_content)
-        new_scroll_layout.setContentsMargins(0, 0, 0, 0)
+        new_scroll_layout.setContentsMargins(16, 0, 16, 0)  # Indent left and right
         new_scroll_layout.setSpacing(0)
 
         # Save new references
