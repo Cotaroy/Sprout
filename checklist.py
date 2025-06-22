@@ -112,15 +112,15 @@ class MenuScroll(QLabel):
 
         # Content inside the scroll area
         history_scroll_content = QWidget()
-        history_scroll_layout = QVBoxLayout(history_scroll_content)
-        history_scroll_layout.setContentsMargins(0, 0, 0, 0)
+        self.history_scroll_layout = QVBoxLayout(history_scroll_content)
+        self.history_scroll_layout.setContentsMargins(0, 0, 0, 0)
 
         # Add each finished task as its own widget
         for i in range(len(self.user.finished_tasks)):
-            self.load_finished_task(i, history_scroll_layout)
+            self.load_finished_task(i, self.history_scroll_layout)
             print("index finished task", i)
 
-        history_scroll_layout.addStretch()  # Push tasks to the top if few
+        self.history_scroll_layout.addStretch()  # Push tasks to the top if few
         history_scroll_area.setWidget(history_scroll_content)
         history_layout.addWidget(history_scroll_area)
 
@@ -132,8 +132,8 @@ class MenuScroll(QLabel):
         self.stacked.addWidget(history_widget)
 
         # --- Signal Connections ---
-        history_button.clicked.connect(lambda: self.stacked.setCurrentIndex(1))
-        back_button.clicked.connect(lambda: self.stacked.setCurrentIndex(0))
+        history_button.clicked.connect(lambda: self.switch_to_history())
+        back_button.clicked.connect(lambda: self.switch_to_main())
 
         layout.addWidget(container)
 
@@ -443,13 +443,46 @@ class MenuScroll(QLabel):
             # --- ADD THE TASK CREATION BUTTON BACK AT THE END ---
             self.create_task_button(layout)
 
-            replacement_widget.hide()
-            button.show()
-
-
         button.clicked.connect(on_button_clicked)
         cancel_button.clicked.connect(on_cancel_clicked)
         save_button.clicked.connect(on_save_clicked)
 
         # Add container to parent layout
         layout.addWidget(container)
+
+    def switch_to_history(self):
+        self.update_finished_tasks()  # ← reload history scroll layout
+        self.stacked.setCurrentIndex(1)
+
+    def switch_to_main(self):
+        self.update_active_tasks()  # ← reload current task layout
+        self.stacked.setCurrentIndex(0)
+
+    def update_finished_tasks(self):
+        # Clear the layout of finished tasks
+        while self.history_scroll_layout.count():
+            item = self.history_scroll_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+
+        for i in range(len(self.user.finished_tasks)):
+            self.load_finished_task(i, self.history_scroll_layout)
+
+    def update_active_tasks(self):
+        # Create new scroll content container
+        self.scroll_content = QWidget()
+        self.scroll_layout = QVBoxLayout(self.scroll_content)
+        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
+        self.scroll_layout.setSpacing(0)
+
+        # Add all active tasks
+        for i in range(len(self.user.tasks)):
+            self.load_task(i, self.scroll_layout)
+
+        # Add the task creation button
+        self.create_task_button(self.scroll_layout)
+
+        # Set this new widget in the scroll area
+        self.scroll_area.setWidget(self.scroll_content)
+

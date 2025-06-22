@@ -48,10 +48,10 @@ class User:
             self.streaks += 1
 
     def delete_task(self, index):
-        self.recently_deleted.append(self.tasks.pop(index))
+        self.finished_tasks.pop(index)
 
     def restore_task(self, index):
-        self.tasks.append(self.recently_deleted.pop(index))
+        self.tasks.append(self.finished_tasks.pop(index))
 
 @dataclass
 class Task:
