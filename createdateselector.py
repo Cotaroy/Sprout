@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel, QVBoxLayout
 from PySide6.QtCore import QDate, Qt
+import datetime
+
 
 class NoScrollComboBox(QComboBox):
     def wheelEvent(self, event):
@@ -75,6 +77,6 @@ def create_date_selector():
                 y = int(self.year_combo.currentText())
                 m = int(self.month_combo.currentText())
                 d = int(self.day_combo.currentText())
-                return QDate(y, m, d)
+                return datetime.date(y, m, d)
 
         return DateSelectorWidget()

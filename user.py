@@ -60,4 +60,7 @@ class Task:
         return hash(self.description)
 
     def to_dict(self):
-        return {'description': self.description, 'deadline': str(self.deadline)}
+        return {
+            'description': self.description,
+            'deadline': self.deadline.strftime("%Y/%m/%d")
+        }

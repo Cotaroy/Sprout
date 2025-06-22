@@ -1,11 +1,13 @@
 
-from saveload import load_user
+from saveload import load_user, save_user
 from pathretriever import R
 from createdateselector import create_date_selector
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QRect, QDate
 from PySide6.QtWidgets import QLabel, QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QFrame, QCheckBox, QHBoxLayout, QPushButton, QLineEdit, QFormLayout, QComboBox
+
+from user import Task
 
 SCROLL_WIDTH = 250
 
@@ -78,6 +80,7 @@ class MenuScroll(QLabel):
                 if i < len(self.user.tasks):
                     self.user.complete_task(i)
                     print('task done')
+            save_user(self.user, 'data/test.json')
             self.update_menu()
 
             self.setGeometry(self.x, self.y, icon_width, icon_height)
@@ -99,9 +102,7 @@ class MenuScroll(QLabel):
 
         self.scroll_area.setWidget(scroll_content)
         self.scroll_area.hide()
-#########################################################################
-#TODO : Save the user data when the scroll is closed
-#########################################################################
+
     def on_checkbox_toggled(self, index, state):
         print(f"Checkbox for task {index} changed to state {state}")
         if state == 2:
@@ -127,7 +128,7 @@ class MenuScroll(QLabel):
 
         task = self.user.tasks[index]
         description = task.description
-        deadline = task.deadline.strftime("%Y/%m/%d")
+        deadline = task.deadline.strftime("%Y-%m-%d")
 
         # Create task UI
         task_widget = QWidget()
@@ -182,7 +183,7 @@ class MenuScroll(QLabel):
         layout.addWidget(deadline_container)
 
         target_layout.addWidget(task_widget)
-    
+
     def create_task_button(self, layout: QVBoxLayout):
         """
         Adds a button to the given layout. When clicked, it hides itself and
@@ -237,8 +238,22 @@ class MenuScroll(QLabel):
             replacement_widget.hide()
             button.show()
 
+        def on_save_clicked():
+            entered_text = task_title.text()
+            selected_date = task_deadline.get_selected_date()
+
+            new_task = Task(entered_text, selected_date)
+            self.user.tasks.append(new_task)
+            save_user(self.user, 'data/test.json')
+            self.update_menu()
+
+            replacement_widget.hide()
+            button.show()
+
+
         button.clicked.connect(on_button_clicked)
         cancel_button.clicked.connect(on_cancel_clicked)
+        save_button.clicked.connect(on_save_clicked)
 
         # Add container to parent layout
         layout.addWidget(container)

@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
     def change_background_on_toggle(self):
         self.set_background()
         self.menu_scroll.toggle_scroll()
+        self.user.streaks += 2
 
     def choose_background(self):
         if self.user.streaks >= 22:
@@ -194,7 +195,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     autostart.add_to_startup()
     app = QApplication(sys.argv)
-    
+
     font_id = QFontDatabase.addApplicationFont(R("assets/font/Atlantistextregular-qZv0.ttf"))
     if font_id == -1:
         print("Failed to load font")
