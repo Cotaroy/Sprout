@@ -20,4 +20,10 @@ def load_user(file_path = FILEPATH) -> User:
                 load_tasks(data['finished_tasks']), data['finished_tutorial'])
 
 def load_tasks(data: list):
-    return [Task(task['description'], datetime.datetime.strptime(task['deadline'], "%Y-%m-%d")) for task in data]
+    return [Task(task['description'], datetime.datetime.strptime(task['deadline'], "%Y-%m-%d"),
+                 handle_null_completed_date(task['completed_date'])) for task in data]
+
+def handle_null_completed_date(date: str | None):
+    if date is None:
+        return None
+    return datetime.datetime.strptime(date, "%Y-%m-%d").date()
