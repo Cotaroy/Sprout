@@ -203,7 +203,8 @@ class MenuScroll(QLabel):
         replacement_layout = QVBoxLayout(replacement_widget)
         replacement_layout.setContentsMargins(0, 0, 0, 0)
 
-        task_title = QLineEdit("Task Title")
+        task_title = QLineEdit()
+        task_title.setPlaceholderText("Enter task description")
         replacement_layout.addWidget(task_title)
 
         task_deadline = create_date_selector()
