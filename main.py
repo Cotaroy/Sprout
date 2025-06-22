@@ -1,5 +1,8 @@
 
 import sys
+
+from PyQt6.QtGui import QCursor
+
 import autostart
 from checklist import MenuScroll
 from saveload import load_user, save_user
@@ -36,6 +39,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.hidden = False
+        self.setMouseTracking(True)
 
         self.user = load_user(R(USER_DATA_FILE))
         print(self.user.streaks)
@@ -196,6 +200,9 @@ class MainWindow(QMainWindow):
         hide_action.triggered.connect(self.hide)
         self.hidden = True
 
+        relocate_action = QAction("Relocate", self)
+        relocate_action.triggered.connect(self.relocate)
+
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(QApplication.quit)
 
@@ -203,9 +210,41 @@ class MainWindow(QMainWindow):
         reset_action.triggered.connect(self.reset_data)
 
         menu.addAction(hide_action)
+        menu.addAction(relocate_action)
         menu.addAction(quit_action)
         menu.addAction(reset_action)
         menu.exec(event.globalPos())
+
+    def relocate(self):
+        class EnterFilter(QtCore.QObject):
+            enter_pressed = QtCore.Signal()
+
+            def eventFilter(self, obj, ev):
+                if ev.type() == QtCore.QEvent.Type.KeyPress:
+                    if ev.key() in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):
+                        self.enter_pressed.emit()
+                        return True
+                return False
+
+        filter = EnterFilter(self)
+        app = QApplication.instance()
+        app.installEventFilter(filter)
+        self.running_relocate = True
+
+        filter.enter_pressed.connect(self.end_running_relocate)
+
+        while self.running_relocate:
+            pos = QCursor.pos()
+            self.move(pos.x() - self.width() // 2, pos.y() - self.height() // 2)
+            QtCore.QCoreApplication.processEvents()
+            QtCore.QThread.msleep(10)
+            if not self.running_relocate:
+                break
+
+        app.removeEventFilter(filter)
+
+    def end_running_relocate(self):
+        self.running_relocate = False
 
     def reset_data(self):
         """Reset user data to default."""
