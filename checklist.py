@@ -321,12 +321,45 @@ class MenuScroll(QLabel):
         button_layout.setSpacing(8)
 
         delete_button = QPushButton("Delete")
-        restore_button = QPushButton("Save")
+        restore_button = QPushButton("Restore")
 
         button_layout.addStretch()
         button_layout.addWidget(delete_button)
         button_layout.addWidget(restore_button)
         button_layout.addStretch()
+
+        def on_delete_clicked():
+            self.user.delete_task(index)
+            save_user(self.user, 'data/test.json')
+
+            # --- CLEAR EXISTING TASKS ---
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            # --- RELOAD ALL TASKS ---
+            for i in range(len(self.user.finished_tasks)):
+                self.load_finished_task(i, layout)
+
+        def on_restore_clicked():
+            self.user.restore_task(index)
+            save_user(self.user, 'data/test.json')
+
+            # --- CLEAR EXISTING TASKS ---
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            # --- RELOAD ALL TASKS ---
+            for i in range(len(self.user.finished_tasks)):
+                self.load_finished_task(i, layout)
+        
+        delete_button.clicked.connect(on_delete_clicked)
+        restore_button.clicked.connect(on_restore_clicked)
 
         layout.addWidget(button_container)
 
