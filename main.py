@@ -119,6 +119,35 @@ class MainWindow(QMainWindow):
         if self.user.event_index < len(Event):
             self.begin_event(gif_x, gif_y, gif_width, gif_height, Event[self.user.event_index])
 
+    def left_arrow_key_pressed_event(self, event):
+        boundaries = [2, 4, 7, 14, 20]
+        for i in range(len(boundaries)):
+            if self.user.streaks <= boundaries[i]:
+                self.user.streaks = boundaries[(i - 1) % len(boundaries)]
+                self.set_background()
+                print(f"Streaks updated to: {self.user.streaks}")
+                self.menu_scroll.update_subtitle()
+                return
+
+        self.user.streaks = 14
+        self.set_background()
+        print(f"Streaks updated to: {self.user.streaks}")
+        self.menu_scroll.update_subtitle()
+
+    def right_arrow_key_pressed_event(self, event):
+        boundaries = [2, 4, 7, 14, 20]
+        for i in range(len(boundaries)):
+            if self.user.streaks <= boundaries[i]:
+                self.user.streaks = boundaries[(i + 1) % len(boundaries)]
+                self.set_background()
+                print(f"Streaks updated to: {self.user.streaks}")
+                self.menu_scroll.update_subtitle()
+                return
+        self.user.streaks = 2
+        self.set_background()
+        print(f"Streaks updated to: {self.user.streaks}")
+        self.menu_scroll.update_subtitle()
+
     def midnight_update(self):
         self.menu_scroll.update_subtitle()
         self.user.check_streak()
@@ -248,20 +277,19 @@ class MainWindow(QMainWindow):
         self.movie.frameChanged.connect(self._on_gif_frame_changed)
         self.movie.start()
 
-# TODO
     def set_stand_still_png(self):
         if hasattr(self, 'gif_label'):
             self.gif_label.setMovie(None)
             standstill_movie = QMovie(R("assets/stand_still.gif"))
-            
+
             if not standstill_movie.isValid():
                 print("stand_still.gif not found or invalid!")
                 return
-            
+
             self.gif_label.setMovie(standstill_movie)
             self.gif_label.setScaledContents(True)
             standstill_movie.start()
-        
+
         # Show text bubble after stationary gif begins playing
         # wait 0.15 seconds before showing text bubble
         QtCore.QTimer.singleShot(200, lambda: self.show_text_bubble())
@@ -404,6 +432,16 @@ class MainWindow(QMainWindow):
             self.gif_label.deleteLater()
         # App resumes normal operation (no further action needed)
 
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Z:
+            self.left_arrow_key_pressed_event(event)
+            print("z pressed")
+        elif event.key() == QtCore.Qt.Key_X:
+            self.right_arrow_key_pressed_event(event)
+            print("x pressed")
+        else:
+            super().keyPressEvent(event)
 
 if __name__ == "__main__":
     autostart.add_to_startup()
