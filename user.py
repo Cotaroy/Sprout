@@ -62,5 +62,5 @@ class Task:
     def to_dict(self):
         return {
             'description': self.description,
-            'deadline': self.deadline.strftime("%Y/%m/%d")
+            'deadline': self.deadline.strftime("%Y-%m-%d")
         }
