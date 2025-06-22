@@ -14,6 +14,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushBut
 from user import run_at_midnight
 
 SCROLL_WIDTH = 250
+DEFAULT_DATA_FILE = 'data/default_data.json'
+USER_DATA_FILE = 'data/user.json'
 
 class EventSpeechBubble(QLabel):
     clicked = QtCore.Signal()
@@ -35,7 +37,7 @@ class MainWindow(QMainWindow):
 
         self.hidden = False
 
-        self.user = load_user(R('data/user.json'))
+        self.user = load_user(R(USER_DATA_FILE))
         print(self.user.streaks)
 
         # AUDIO
@@ -196,9 +198,23 @@ class MainWindow(QMainWindow):
 
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(QApplication.quit)
+
+        reset_action = QAction("Reset Data", self)
+        reset_action.triggered.connect(self.reset_data)
+
         menu.addAction(hide_action)
         menu.addAction(quit_action)
+        menu.addAction(reset_action)
         menu.exec(event.globalPos())
+
+    def reset_data(self):
+        """Reset user data to default."""
+        self.user = load_user(DEFAULT_DATA_FILE)
+        save_user(self.user, R(USER_DATA_FILE))
+        self.menu_scroll.update_subtitle()
+        self.menu_scroll.update_menu()
+        self.set_background()
+        print("Data reset to default.")
 
     def closeEvent(self, event):
         event.ignore()
@@ -420,7 +436,7 @@ class MainWindow(QMainWindow):
 
     def _on_walking_out_finished(self):
         if hasattr(self, 'gif_label'):
-            save_user(self.user, R('data/user.json'))
+            save_user(self.user, R(USER_DATA_FILE))
             self.movie.stop()
             self.gif_label.deleteLater()
         # App resumes normal operation (no further action needed)
