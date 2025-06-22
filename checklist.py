@@ -457,9 +457,8 @@ class MenuScroll(QLabel):
         self.update_menu()
 
     def switch_to_main(self):
+        self.update_active_tasks()  # ← rebuild content
         self.stacked.setCurrentIndex(0)
-        self.update_active_tasks()  # ← reload current task layout
-        self.update_menu()
 
     def update_finished_tasks(self):
         # Clear the layout of finished tasks
@@ -479,12 +478,25 @@ class MenuScroll(QLabel):
             self.load_finished_task(i, self.history_scroll_layout)
 
     def update_active_tasks(self):
-        # Add all active tasks
+        # Create new scroll content and layout
+        new_scroll_content = QWidget()
+        new_scroll_layout = QVBoxLayout(new_scroll_content)
+        new_scroll_layout.setContentsMargins(0, 0, 0, 0)
+        new_scroll_layout.setSpacing(0)
+
+        # Save new references
+        self.scroll_content = new_scroll_content
+        self.scroll_layout = new_scroll_layout
+
+        # Load tasks
         for i in range(len(self.user.tasks)):
             self.load_task(i, self.scroll_layout)
 
-        # Add the task creation button
+        # Add creation button
         self.create_task_button(self.scroll_layout)
 
-        # Set this new widget in the scroll area
+        # Attach new scroll content
         self.scroll_area.setWidget(self.scroll_content)
+
+        self.scroll_area.show()
+
