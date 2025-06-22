@@ -34,6 +34,12 @@ class MenuScroll(QLabel):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
 
+        title_label = self.title("To-Do List")
+        container_layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        subtitle_label = self.subtitle()
+        container_layout.addWidget(subtitle_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
         # Scroll area setup (child of the label)
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setGeometry(x, 55, width-35, height-40)
@@ -167,6 +173,9 @@ class MenuScroll(QLabel):
                     self.user.complete_task(i)
                     self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
                     print('task done')
+            if not self.user.finished_task_today and self.checkmarked_indices != []:
+                self.update_subtitle()
+            # Clear the checkmarked indices after processing
             self.checkmarked_indices = []
             save_user(self.user, 'data/test.json')
             self.update_menu()
@@ -489,6 +498,8 @@ class MenuScroll(QLabel):
                 self.user.complete_task(i)
                 self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
                 print('task done')
+        if not self.user.finished_task_today and self.checkmarked_indices != []:
+                self.update_subtitle()
         self.checkmarked_indices = []
        
         while self.history_scroll_layout.count():
@@ -505,6 +516,8 @@ class MenuScroll(QLabel):
         else:
             for i in range(len(self.user.finished_tasks)):
                 self.load_finished_task(i, self.history_scroll_layout)
+
+        self.change_title("History")
         
         self.history_scroll_layout.addStretch()
 
@@ -529,5 +542,27 @@ class MenuScroll(QLabel):
         # Attach new scroll content
         self.scroll_area.setWidget(self.scroll_content)
 
-        self.scroll_area.show()
+        self.change_title("To-Do List")
 
+        self.scroll_area.show()
+    
+    def title(self, string: str = "Title"):
+        self.title = QLabel(string)
+        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title.setStyleSheet("font-size: 24px; font-weight: bold; color: white; padding: 10px;")
+        self.title.setContentsMargins(4, 4, 4, 4)
+
+        return self.title
+    def change_title(self, new_title: str):
+        self.title.setText(new_title)
+
+    def subtitle(self, string: str = "Streak:"):
+        self.subtitle = QLabel(string + str(self.user.streaks))
+        self.subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.subtitle.setStyleSheet("font-size: 18px; color: white; padding: 10px;")
+        self.subtitle.setContentsMargins(0, 0, 0, 8)
+
+        return self.subtitle
+
+    def update_subtitle(self):
+        self.subtitle.setText("Streak: " + str(self.user.streaks))

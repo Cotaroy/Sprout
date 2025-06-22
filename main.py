@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
 
         self.menu_scroll = MenuScroll(self.user, x, y, icon_width, icon_height, self)
 
-        run_at_midnight(self.user.check_streak)
+        run_at_midnight(self.midnight_update)
 
         self.menu_scroll.setGeometry(x, y, icon_width, icon_height)
 
@@ -119,12 +119,17 @@ class MainWindow(QMainWindow):
         if self.user.event_index < len(Event):
             self.begin_event(gif_x, gif_y, gif_width, gif_height, Event[self.user.event_index])
 
+    def midnight_update(self):
+        self.menu_scroll.update_subtitle()
+        self.user.check_streak()
+
     def change_background_on_toggle(self):
         self.set_background()
         self.menu_scroll.toggle_scroll()
         self.sfx_player.play_sfx(R("assets/audio/sfx/scroll.mp3"))
 
         self.user.streaks += TESTING_STREAK_NUMBER_CHANGE
+        self.menu_scroll.update_subtitle()
 
     def choose_background(self):
         if self.user.streaks >= 20:
