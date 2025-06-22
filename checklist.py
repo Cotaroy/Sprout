@@ -244,10 +244,21 @@ class MenuScroll(QLabel):
 
             new_task = Task(entered_text, selected_date)
             self.user.tasks.append(new_task)
-            self.load_task(len(self.user.tasks) - 1, layout)
             save_user(self.user, 'data/test.json')
-            self.toggle_scroll()
-            self.toggle_scroll()
+
+            # --- CLEAR EXISTING TASKS ---
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            # --- RELOAD ALL TASKS ---
+            for i in range(len(self.user.tasks)):
+                self.load_task(i, layout)
+
+            # --- ADD THE TASK CREATION BUTTON BACK AT THE END ---
+            self.create_task_button(layout)
 
             replacement_widget.hide()
             button.show()

@@ -1,5 +1,5 @@
 {
-    "streaks": 25,
+    "streaks": 27,
     "finished_task_today": false,
     "tasks": [
         {
@@ -29,6 +29,14 @@
         {
             "description": "call a friend",
             "deadline": "2025-06-25"
+        },
+        {
+            "description": "Task Title",
+            "deadline": "2025-06-01"
+        },
+        {
+            "description": "Task Title",
+            "deadline": "2025-06-01"
         }
     ],
     "finished_tasks": [],
