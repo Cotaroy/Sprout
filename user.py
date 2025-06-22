@@ -10,7 +10,7 @@ def run_at_midnight(func):
     def schedule():
         while True:
             now = datetime.datetime.now().time()
-            if now == datetime.time():
+            if now == datetime.time(0, 0, 0):
                 func()
     threading.Thread(target=schedule, daemon=True).start()
 

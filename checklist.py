@@ -1,4 +1,4 @@
-from user import User
+from user import User, run_at_midnight
 from saveload import load_user
 from pathretriever import R
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -15,6 +15,8 @@ class MenuScroll(QLabel):
         super().__init__(parent)
 
         self.user = load_user('data/test.json')
+
+        run_at_midnight(self.user.check_streak)
 
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # Optional: hand cursor
         self.open = False
