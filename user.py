@@ -9,9 +9,12 @@ import threading
 def run_at_midnight(func):
     def schedule():
         while True:
-            now = datetime.datetime.now().time()
-            if now == datetime.time(0, 0, 0):
-                func()
+            now = datetime.datetime.now()
+            # Calculate next midnight
+            next_midnight = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            seconds_until_midnight = (next_midnight - now).total_seconds()
+            threading.Event().wait(seconds_until_midnight)
+            func()
     threading.Thread(target=schedule, daemon=True).start()
 
 
