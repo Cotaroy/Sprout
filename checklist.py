@@ -163,6 +163,7 @@ class MenuScroll(QLabel):
             for i in self.checkmarked_indices:
                 if i < len(self.user.tasks):
                     self.user.complete_task(i)
+                    self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
                     print('task done')
             self.checkmarked_indices = []
             save_user(self.user, 'data/test.json')
@@ -357,7 +358,7 @@ class MenuScroll(QLabel):
             # --- RELOAD ALL TASKS ---
             for i in range(len(self.user.finished_tasks)):
                 self.load_finished_task(i, layout)
-        
+
         delete_button.clicked.connect(on_delete_clicked)
         restore_button.clicked.connect(on_restore_clicked)
 
@@ -451,15 +452,23 @@ class MenuScroll(QLabel):
         layout.addWidget(container)
 
     def switch_to_history(self):
-        self.update_finished_tasks()  # ← reload history scroll layout
         self.stacked.setCurrentIndex(1)
+        self.update_finished_tasks()  # ← reload history scroll layout
+        self.update_menu()
 
     def switch_to_main(self):
-        self.update_active_tasks()  # ← reload current task layout
         self.stacked.setCurrentIndex(0)
+        self.update_active_tasks()  # ← reload current task layout
+        self.update_menu()
 
     def update_finished_tasks(self):
         # Clear the layout of finished tasks
+        for i in self.checkmarked_indices:
+            if i < len(self.user.tasks):
+                self.user.complete_task(i)
+                self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
+                print('task done')
+        self.checkmarked_indices = []
         while self.history_scroll_layout.count():
             item = self.history_scroll_layout.takeAt(0)
             widget = item.widget()
@@ -470,12 +479,6 @@ class MenuScroll(QLabel):
             self.load_finished_task(i, self.history_scroll_layout)
 
     def update_active_tasks(self):
-        # Create new scroll content container
-        self.scroll_content = QWidget()
-        self.scroll_layout = QVBoxLayout(self.scroll_content)
-        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
-        self.scroll_layout.setSpacing(0)
-
         # Add all active tasks
         for i in range(len(self.user.tasks)):
             self.load_task(i, self.scroll_layout)
@@ -485,4 +488,3 @@ class MenuScroll(QLabel):
 
         # Set this new widget in the scroll area
         self.scroll_area.setWidget(self.scroll_content)
-
