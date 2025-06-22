@@ -368,7 +368,6 @@ class MenuScroll(QLabel):
             self.user.restore_task(index)
             save_user(self.user, R('data/user.json'))
             self.update_finished_tasks()
-            self.se
 
             # # --- CLEAR EXISTING TASKS ---
             # while layout.count():
