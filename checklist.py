@@ -1,11 +1,10 @@
-
 from saveload import load_user, save_user
 from pathretriever import R
 from createdateselector import create_date_selector
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt, QRect, QDate
-from PySide6.QtWidgets import QLabel, QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QFrame, QCheckBox, QHBoxLayout, QPushButton, QLineEdit, QFormLayout, QComboBox
+from PySide6.QtCore import Qt, QRect
+from PySide6.QtWidgets import QLabel, QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QFrame, QCheckBox, QHBoxLayout, QPushButton, QLineEdit, QFormLayout, QComboBox, QStackedLayout
 
 from user import Task
 from audio_player import AudioPlayer
@@ -30,6 +29,11 @@ class MenuScroll(QLabel):
         self.icon_width = width
         self.icon_height = height
 
+        self.container = QWidget(self)
+        container_layout = QVBoxLayout(self.container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+
         # Scroll area setup (child of the label)
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setGeometry(x, 55, width-35, height*4) #border: none;
@@ -48,13 +52,92 @@ class MenuScroll(QLabel):
         self.scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setMinimumHeight(200)
+        self.scroll_area.setMaximumHeight(300)
+
+        # Scroll content
+        self.scroll_content = QWidget()
+        self.scroll_layout = QVBoxLayout(self.scroll_content)
+        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
 
         self.scroll_size = QRect(x, 55, width-35, height*4)
 
-        # Scroll area content
+        self.scroll_area.setWidget(self.scroll_content)
+        container_layout.addWidget(self.scroll_area)
+
+        # Load task items into scroll layout
         self.update_menu()
 
+        self.create_history_button(container_layout)
+
+        # Geometry and positioning
+        self.container.setGeometry(self.scroll_size)  # same as before
+
         self.checkmarked_indices = []
+
+    def create_history_button(self, layout: QVBoxLayout):
+        """
+        Adds a history button that toggles between the main scroll area and a history view.
+        """
+        print("Creating history button")
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Stacked layout to switch between main view and history
+        self.stacked = QStackedLayout()
+        container_layout.addLayout(self.stacked)
+
+        # --- Page 0: Scroll Area Container ---
+        scroll_page = QWidget()
+        scroll_layout = QVBoxLayout(scroll_page)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.addWidget(self.scroll_area)
+
+        history_button = QPushButton("History")
+        history_button.setStyleSheet("padding: 4px; margin: 2px;")
+        scroll_layout.addWidget(history_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        self.stacked.addWidget(scroll_page)
+
+        # --- Page 1: History View with Scroll Area ---
+        history_widget = QWidget()
+        history_layout = QVBoxLayout(history_widget)
+        history_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Scrollable area for history content
+        history_scroll_area = QScrollArea()
+        history_scroll_area.setWidgetResizable(True)
+        history_scroll_area.setStyleSheet("background-color: transparent;")
+        history_scroll_area.setMinimumHeight(200)
+        history_scroll_area.setMaximumHeight(300)
+
+        # Content inside the scroll area
+        history_scroll_content = QWidget()
+        self.history_scroll_layout = QVBoxLayout(history_scroll_content)
+        self.history_scroll_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Add each finished task as its own widget
+        for i in range(len(self.user.finished_tasks)):
+            self.load_finished_task(i, self.history_scroll_layout)
+            print("index finished task", i)
+
+        self.history_scroll_layout.addStretch()  # Push tasks to the top if few
+        history_scroll_area.setWidget(history_scroll_content)
+        history_layout.addWidget(history_scroll_area)
+
+        # Back button below the scroll
+        back_button = QPushButton("Back")
+        back_button.setStyleSheet("padding: 4px; margin: 2px;")
+        history_layout.addWidget(back_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        self.stacked.addWidget(history_widget)
+
+        # --- Signal Connections ---
+        history_button.clicked.connect(lambda: self.switch_to_history())
+        back_button.clicked.connect(lambda: self.switch_to_main())
+
+        layout.addWidget(container)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
@@ -70,6 +153,7 @@ class MenuScroll(QLabel):
             self.setPixmap(icon_pixmap)
             self.setScaledContents(True)
             self.scroll_area.show()
+
             self.open = True
         else:
             icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH, Qt.SmoothTransformation)
@@ -81,7 +165,9 @@ class MenuScroll(QLabel):
             for i in self.checkmarked_indices:
                 if i < len(self.user.tasks):
                     self.user.complete_task(i)
+                    self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
                     print('task done')
+            self.checkmarked_indices = []
             save_user(self.user, 'data/test.json')
             self.update_menu()
 
@@ -101,6 +187,7 @@ class MenuScroll(QLabel):
             self.load_task(i, scroll_layout)
 
         self.create_task_button(scroll_layout)
+        scroll_layout.addStretch()  # Push tasks to the top if few
 
         self.scroll_area.setWidget(scroll_content)
         self.scroll_area.hide()
@@ -173,7 +260,7 @@ class MenuScroll(QLabel):
         deadline_label = QLabel(f"Due: {deadline}")
         deadline_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         deadline_label.setStyleSheet("""
-            font-size: 12px;
+            font-size: 14px;
             padding: 0px;
             margin: 0px;
         """)
@@ -185,6 +272,102 @@ class MenuScroll(QLabel):
         # Add container to the main layout
         layout.addWidget(deadline_container)
 
+        target_layout.addWidget(task_widget)
+
+    def load_finished_task(self, index: int, target_layout: QVBoxLayout):
+        if index < 0 or index >= len(self.user.finished_tasks):
+            print(f"Invalid task index: {index}")
+            return
+
+        task = self.user.finished_tasks[index]
+        description = task.description
+        deadline = task.deadline.strftime("%Y-%m-%d")
+
+        # Task container
+        task_widget = QWidget()
+        layout = QVBoxLayout(task_widget)
+        layout.setSpacing(4)  # Small vertical gap between sections
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # --- Bullet row (like checkbox+label) ---
+        row_widget = QWidget()
+        row_layout = QHBoxLayout(row_widget)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.setSpacing(4)
+
+        bullet = QLabel("•")
+        bullet.setStyleSheet("font-size: 16px; color: white;")
+        bullet.setFixedWidth(10)
+
+        label = QLabel(description)
+        label.setWordWrap(True)
+        label.setStyleSheet("padding: 0px; margin: 0px;")
+        label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+
+        row_layout.addWidget(bullet)
+        row_layout.addWidget(label)
+        layout.addWidget(row_widget)
+
+        # --- Deadline Label ---
+        deadline_label = QLabel(f"Completed: {deadline}")
+        deadline_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        deadline_label.setStyleSheet("""
+            font-size: 14px;
+            color: white;
+            margin: 0px;
+        """)
+        layout.addWidget(deadline_label)
+
+        # --- Button Row ---
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setSpacing(8)
+
+        delete_button = QPushButton("Delete")
+        restore_button = QPushButton("Restore")
+
+        button_layout.addStretch()
+        button_layout.addWidget(delete_button)
+        button_layout.addWidget(restore_button)
+        button_layout.addStretch()
+
+        def on_delete_clicked():
+            self.user.delete_task(index)
+            save_user(self.user, 'data/test.json')
+
+            # --- CLEAR EXISTING TASKS ---
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            # --- RELOAD ALL TASKS ---
+            for i in range(len(self.user.finished_tasks)):
+                self.load_finished_task(i, layout)
+
+        def on_restore_clicked():
+            self.user.restore_task(index)
+            save_user(self.user, 'data/test.json')
+
+            # --- CLEAR EXISTING TASKS ---
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+
+            # --- RELOAD ALL TASKS ---
+            for i in range(len(self.user.finished_tasks)):
+                self.load_finished_task(i, layout)
+
+        delete_button.clicked.connect(on_delete_clicked)
+        restore_button.clicked.connect(on_restore_clicked)
+
+        layout.addWidget(button_container)
+
+        # --- Add to outer layout ---
         target_layout.addWidget(task_widget)
 
     def create_task_button(self, layout: QVBoxLayout):
@@ -206,7 +389,8 @@ class MenuScroll(QLabel):
         replacement_layout = QVBoxLayout(replacement_widget)
         replacement_layout.setContentsMargins(0, 0, 0, 0)
 
-        task_title = QLineEdit("Task Title")
+        task_title = QLineEdit()
+        task_title.setPlaceholderText("Enter task description")
         replacement_layout.addWidget(task_title)
 
         task_deadline = create_date_selector()
@@ -263,13 +447,59 @@ class MenuScroll(QLabel):
             # --- ADD THE TASK CREATION BUTTON BACK AT THE END ---
             self.create_task_button(layout)
 
-            replacement_widget.hide()
-            button.show()
-
-
         button.clicked.connect(on_button_clicked)
         cancel_button.clicked.connect(on_cancel_clicked)
         save_button.clicked.connect(on_save_clicked)
 
         # Add container to parent layout
         layout.addWidget(container)
+
+    def switch_to_history(self):
+        self.stacked.setCurrentIndex(1)
+        self.update_finished_tasks()  # ← reload history scroll layout
+        self.update_menu()
+
+    def switch_to_main(self):
+        self.update_active_tasks()  # ← rebuild content
+        self.stacked.setCurrentIndex(0)
+
+    def update_finished_tasks(self):
+        # Clear the layout of finished tasks
+        for i in self.checkmarked_indices:
+            if i < len(self.user.tasks):
+                self.user.complete_task(i)
+                self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
+                print('task done')
+        self.checkmarked_indices = []
+        while self.history_scroll_layout.count():
+            item = self.history_scroll_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+
+        for i in range(len(self.user.finished_tasks)):
+            self.load_finished_task(i, self.history_scroll_layout)
+
+    def update_active_tasks(self):
+        # Create new scroll content and layout
+        new_scroll_content = QWidget()
+        new_scroll_layout = QVBoxLayout(new_scroll_content)
+        new_scroll_layout.setContentsMargins(0, 0, 0, 0)
+        new_scroll_layout.setSpacing(0)
+
+        # Save new references
+        self.scroll_content = new_scroll_content
+        self.scroll_layout = new_scroll_layout
+
+        # Load tasks
+        for i in range(len(self.user.tasks)):
+            self.load_task(i, self.scroll_layout)
+
+        # Add creation button
+        self.create_task_button(self.scroll_layout)
+
+        # Attach new scroll content
+        self.scroll_area.setWidget(self.scroll_content)
+
+        self.scroll_area.show()
+

@@ -41,27 +41,37 @@ class User:
                 'finished_tasks': finished_tasks, 'finished_tutorial': self.finished_tutorial}
 
     def complete_task(self, index):
+        self.tasks[index].completed_date = datetime.datetime.today()
         self.finished_tasks.append(self.tasks.pop(index))
         if not self.finished_task_today:
             self.finished_task_today = True
             self.streaks += 1
 
     def delete_task(self, index):
-        self.recently_deleted.append(self.tasks.pop(index))
+        self.finished_tasks.pop(index)
 
     def restore_task(self, index):
-        self.tasks.append(self.recently_deleted.pop(index))
+        self.tasks.append(self.finished_tasks.pop(index))
 
 @dataclass
 class Task:
     description: str
     deadline: datetime.date
+    completed_date: datetime.date = None
 
     def __hash__(self):
         return hash(self.description)
 
     def to_dict(self):
-        return {
-            'description': self.description,
-            'deadline': self.deadline.strftime("%Y-%m-%d")
-        }
+        if self.completed_date is not None:
+            return {
+                'description': self.description,
+                'deadline': self.deadline.strftime("%Y-%m-%d"),
+                'completed_date': self.completed_date.strftime("%Y-%m-%d")
+            }
+        else:
+            return {
+                'description': self.description,
+                'deadline': self.deadline.strftime("%Y-%m-%d"),
+                'completed_date': None
+            }

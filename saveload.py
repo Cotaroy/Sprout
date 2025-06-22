@@ -14,18 +14,16 @@ def save_user(user: User, file_path: str = FILEPATH) -> None:
         json.dump(user_data, f, ensure_ascii=False, indent=4)
 
 def load_user(file_path = FILEPATH) -> User:
-    """
-    >>> a = Task('say hello to the neighbours', datetime.datetime.now().date())
-    >>> tommy = User(tasks=[a])
-    >>> save(tommy, 'data/test.json')
-    >>> load_user('data/test.json')
-    User(streaks=0, finished_task_today=False, tasks=[Task(description='say hello to the neighbours', deadline=datetime.datetime(2025, 6, 21, 0, 0))], finished_tasks=[], finished_tutorial=False, recently_deleted=[])
-
-    """
     with open(file_path, 'r') as file:
         data = json.load(file)
     return User(data['streaks'], data['event_index'], data['finished_task_today'], load_tasks(data['tasks']),
                 load_tasks(data['finished_tasks']), data['finished_tutorial'])
 
 def load_tasks(data: list):
-    return [Task(task['description'], datetime.datetime.strptime(task['deadline'], "%Y-%m-%d")) for task in data]
+    return [Task(task['description'], datetime.datetime.strptime(task['deadline'], "%Y-%m-%d"),
+                 handle_null_completed_date(task['completed_date'])) for task in data]
+
+def handle_null_completed_date(date: str | None):
+    if date is None:
+        return None
+    return datetime.datetime.strptime(date, "%Y-%m-%d").date()
