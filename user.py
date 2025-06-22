@@ -22,6 +22,7 @@ def run_at_midnight(func):
 @dataclass
 class User:
     streaks: int = 0
+    event_index: int = 0
     finished_task_today: bool = False
     tasks: list[Task] = field(default_factory=list)
     finished_tasks: list[Task] = field(default_factory=list)
@@ -36,7 +37,7 @@ class User:
     def to_dict(self):
         tasks = [task.to_dict() for task in self.tasks]
         finished_tasks = [task.to_dict() for task in self.finished_tasks]
-        return {'streaks': self.streaks, 'finished_task_today': self.finished_task_today, 'tasks': tasks,
+        return {'streaks': self.streaks, 'event_index': self.event_index, 'finished_task_today': self.finished_task_today, 'tasks': tasks,
                 'finished_tasks': finished_tasks, 'finished_tutorial': self.finished_tutorial}
 
     def complete_task(self, index):

@@ -1,10 +1,9 @@
 import sys
 import autostart
 from checklist import MenuScroll
-from saveload import load_user
+from saveload import load_user, save_user
 
-
-from event import Event
+from event import load_event_list
 from pathretriever import R
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QAction, QIcon, QMovie
@@ -104,8 +103,10 @@ class MainWindow(QMainWindow):
         gif_width = self.image_label.width()
         gif_height = self.image_label.height()
 
-        Event = [['Hello', 'there', 'i', 'am', 'bob']]
-        self.begin_event(gif_x, gif_y, gif_width, gif_height, Event[0])
+        Event = load_event_list()
+
+        if self.user.event_index < len(Event):
+            self.begin_event(gif_x, gif_y, gif_width, gif_height, Event[self.user.event_index])
 
     def change_background_on_toggle(self):
         self.set_background()
@@ -206,6 +207,7 @@ class MainWindow(QMainWindow):
             self.speech_bubble.hide()
 
     def begin_event(self, x, y, width, height, messages):
+        self.user.event_index += 1
 
         self.setup_speech_bubble(messages)
         self.speech_bubble.hide()
@@ -371,6 +373,7 @@ class MainWindow(QMainWindow):
 
     def _on_walking_out_finished(self):
         if hasattr(self, 'gif_label'):
+            save_user(self.user, 'data/test.json')
             self.movie.stop()
             self.gif_label.deleteLater()
         # App resumes normal operation (no further action needed)
