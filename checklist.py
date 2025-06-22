@@ -80,6 +80,7 @@ class MenuScroll(QLabel):
                 if i < len(self.user.tasks):
                     self.user.complete_task(i)
                     print('task done')
+            self.checkmarked_indices = []
             save_user(self.user, 'data/test.json')
             self.update_menu()
 
