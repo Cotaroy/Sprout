@@ -17,7 +17,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushBut
 from user import run_at_midnight
 
 SCROLL_WIDTH = 250
-TESTING_STREAK_NUMBER_CHANGE = 1
+TESTING_STREAK_NUMBER_CHANGE = 0
 
 class EventSpeechBubble(QLabel):
     clicked = QtCore.Signal()
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
 
         self.hidden = False
 
-        self.user = load_user('data/test.json')
+        self.user = load_user(R('data/user.json'))
         print(self.user.streaks)
 
         # AUDIO
@@ -399,7 +399,7 @@ class MainWindow(QMainWindow):
 
     def _on_walking_out_finished(self):
         if hasattr(self, 'gif_label'):
-            save_user(self.user, 'data/test.json')
+            save_user(self.user, R('data/user.json'))
             self.movie.stop()
             self.gif_label.deleteLater()
         # App resumes normal operation (no further action needed)

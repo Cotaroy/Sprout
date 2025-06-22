@@ -2,10 +2,11 @@
 import datetime
 import json
 from dataclasses import asdict
+from pathretriever import R
 
 from user import User, Task
 
-FILEPATH = "data/sample_data.json"
+FILEPATH = R("data/user.json")
 
 
 def save_user(user: User, file_path: str = FILEPATH) -> None:

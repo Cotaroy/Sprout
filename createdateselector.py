@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel, QVBoxLayout, QSizePolicy
 from PySide6.QtCore import QDate, Qt
 import datetime
 
@@ -30,11 +30,28 @@ def create_date_selector():
                 for month in range(1, 13):
                     self.month_combo.addItem(str(month))
 
+                # Set properties
+                self.year_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                self.month_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                self.day_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+                # ensure they never shrink below text width
+                self.year_combo.setMinimumContentsLength(4)    # “2025”
+                self.month_combo.setMinimumContentsLength(2)   # “12”
+                self.day_combo.setMinimumContentsLength(2)     # “31”
+                for combo in (self.year_combo, self.month_combo, self.day_combo):
+                    combo.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+
+                self.year_combo.setStyleSheet("font-size:14px;")
+                self.month_combo.setStyleSheet("font-size:14px;")
+                self.day_combo.setStyleSheet("font-size:14px;")
+                
                 # Layouts
                 hbox = QHBoxLayout()
-                hbox.addWidget(self.year_combo)
-                hbox.addWidget(self.month_combo)
-                hbox.addWidget(self.day_combo)
+                hbox.addWidget(self.year_combo, 2)
+                hbox.addWidget(self.month_combo, 1)
+                hbox.addWidget(self.day_combo, 1)
+                hbox.setSpacing(4)
 
                 vbox = QVBoxLayout(self)
                 vbox.addLayout(hbox)
@@ -71,6 +88,7 @@ def create_date_selector():
                 m = self.month_combo.currentText()
                 d = self.day_combo.currentText()
                 self.date_label.setText(f"Selected date: {y}-{m.zfill(2)}-{d.zfill(2)}")
+                self.date_label.setStyleSheet("font-size: 14px;")
 
             def get_selected_date(self):
                 """Returns the selected date as a QDate object."""

@@ -35,9 +35,11 @@ class MenuScroll(QLabel):
         container_layout.setSpacing(0)
 
         title_label = self.title("To-Do List")
+        title_label.hide()  # Initially hidden
         container_layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         subtitle_label = self.subtitle()
+        subtitle_label.hide()  # Initially hidden
         container_layout.addWidget(subtitle_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         # Scroll area setup (child of the label)
@@ -160,6 +162,9 @@ class MenuScroll(QLabel):
             self.setScaledContents(True)
             self.scroll_area.show()
 
+            self.title.show()
+            self.subtitle.show()
+
             self.open = True
         else:
             icon_pixmap = QPixmap(R("assets/scroll_closed.png")).scaledToWidth(SCROLL_WIDTH, Qt.SmoothTransformation)
@@ -177,13 +182,17 @@ class MenuScroll(QLabel):
                 self.update_subtitle()
             # Clear the checkmarked indices after processing
             self.checkmarked_indices = []
-            save_user(self.user, 'data/test.json')
+            save_user(self.user, R('data/user.json'))
             self.update_menu()
 
             self.setGeometry(self.x, self.y, icon_width, icon_height)
             self.setPixmap(icon_pixmap)
             self.setScaledContents(True)
             self.scroll_area.hide()
+
+            self.title.hide()
+            self.subtitle.hide()
+
             self.open = False
 
 
@@ -340,7 +349,7 @@ class MenuScroll(QLabel):
         def on_delete_clicked():
             self.sfx_player.play_sfx(R("assets/audio/sfx/delete_task.mp3"))
             self.user.delete_task(index)
-            save_user(self.user, 'data/test.json')
+            save_user(self.user, R('data/user.json'))
             self.update_finished_tasks()
 
             # # --- CLEAR EXISTING TASKS ---
@@ -357,7 +366,7 @@ class MenuScroll(QLabel):
         def on_restore_clicked():
             self.sfx_player.play_sfx(R("assets/audio/sfx/delete_task.mp3"))
             self.user.restore_task(index)
-            save_user(self.user, 'data/test.json')
+            save_user(self.user, R('data/user.json'))
             self.update_finished_tasks()
             self.se
 
@@ -417,6 +426,13 @@ class MenuScroll(QLabel):
 
         task_title = QLineEdit()
         task_title.setPlaceholderText("Enter task description")
+        task_title.setStyleSheet("""
+            QLineEdit {
+                padding: 4px;
+                border: 1px solid #6b4e3d;
+                border-radius: 4px;
+            }
+        """)
         replacement_layout.addWidget(task_title)
 
         task_deadline = create_date_selector()
@@ -458,7 +474,7 @@ class MenuScroll(QLabel):
 
             new_task = Task(entered_text, selected_date)
             self.user.tasks.append(new_task)
-            save_user(self.user, 'data/test.json')
+            save_user(self.user, R('data/user.json'))
 
             # --- CLEAR EXISTING TASKS ---
             while layout.count():
