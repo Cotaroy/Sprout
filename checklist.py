@@ -1,10 +1,11 @@
 
 from saveload import load_user
 from pathretriever import R
+from createdateselector import create_date_selector
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt, QRect
-from PySide6.QtWidgets import QLabel, QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QFrame, QCheckBox, QHBoxLayout, QPushButton
+from PySide6.QtCore import Qt, QRect, QDate
+from PySide6.QtWidgets import QLabel, QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QFrame, QCheckBox, QHBoxLayout, QPushButton, QLineEdit, QFormLayout, QComboBox
 
 SCROLL_WIDTH = 250
 
@@ -181,7 +182,7 @@ class MenuScroll(QLabel):
         layout.addWidget(deadline_container)
 
         target_layout.addWidget(task_widget)
-
+    
     def create_task_button(self, layout: QVBoxLayout):
         """
         Adds a button to the given layout. When clicked, it hides itself and
@@ -193,7 +194,7 @@ class MenuScroll(QLabel):
         container_layout.setContentsMargins(0, 0, 0, 0)
 
         # Button
-        button = QPushButton("Click me to show more")
+        button = QPushButton("Task Button")
         container_layout.addWidget(button)
 
         # Replacement layout content (hidden initially)
@@ -201,8 +202,28 @@ class MenuScroll(QLabel):
         replacement_layout = QVBoxLayout(replacement_widget)
         replacement_layout.setContentsMargins(0, 0, 0, 0)
 
-        label = QLabel("Hello, I replaced the button!")
-        replacement_layout.addWidget(label)
+        task_title = QLineEdit("Task Title")
+        replacement_layout.addWidget(task_title)
+
+        task_deadline = create_date_selector()
+        deadline_title = QLabel("Task Deadline")
+
+        font = task_deadline.font()
+        font.setPointSize(12)  # Set size in points
+
+        task_deadline.setFont(font)
+        deadline_title.setFont(font)
+        replacement_layout.addWidget(deadline_title)
+        replacement_layout.addWidget(task_deadline)
+
+        button_layout = QHBoxLayout()
+        button_layout.setContentsMargins(0, 0, 0, 0)
+
+        cancel_button = QPushButton("Cancel")
+        save_button = QPushButton("Save")
+        button_layout.addWidget(cancel_button)
+        button_layout.addWidget(save_button)
+        replacement_layout.addLayout(button_layout)
 
         replacement_widget.hide()
         container_layout.addWidget(replacement_widget)
@@ -212,7 +233,12 @@ class MenuScroll(QLabel):
             button.hide()
             replacement_widget.show()
 
+        def on_cancel_clicked():
+            replacement_widget.hide()
+            button.show()
+
         button.clicked.connect(on_button_clicked)
+        cancel_button.clicked.connect(on_cancel_clicked)
 
         # Add container to parent layout
         layout.addWidget(container)

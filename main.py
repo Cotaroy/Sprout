@@ -194,13 +194,13 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     autostart.add_to_startup()
     app = QApplication(sys.argv)
-
-    font_id = QFontDatabase.addApplicationFont(R("assets/font/BlueScreenPersonalUseRegular-0W1M9.ttf"))
+    
+    font_id = QFontDatabase.addApplicationFont(R("assets/font/Atlantistextregular-qZv0.ttf"))
     if font_id == -1:
         print("Failed to load font")
     else:
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-        app.setFont(QFont(font_family, 11))  # Set globally
+        app.setFont(QFont(font_family, 14))  # Set globally
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
     window.show()
