@@ -3,7 +3,7 @@
     "finished_task_today": false,
     "tasks": [
         {
-            "description": "say hello to the neighbours",
+            "description": "say hello to the neighbours insert very long text here to test the overflow",
             "deadline": "2025-06-21"
         },
         {
@@ -13,6 +13,14 @@
         {
             "description": "finish reading a book",
             "deadline": "2025-06-23"
+        },
+        {
+            "description": "go for a 30-minute walk",
+            "deadline": "2025-06-24"
+        },
+        {
+            "description": "go for a 30-minute walk",
+            "deadline": "2025-06-24"
         },
         {
             "description": "go for a 30-minute walk",
