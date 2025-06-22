@@ -3,5 +3,6 @@
 /build
 /dist
 main.spec
+sprout.spec
 .idea/Big-Ica.iml
 /.idea
