@@ -1,5 +1,5 @@
-from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput,QMediaDevices
-from PyQt6.QtCore import QUrl, QTimer
+from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput, QMediaDevices
+from PySide6.QtCore import QUrl, QTimer
 import os
 
 

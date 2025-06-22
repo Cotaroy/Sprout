@@ -36,7 +36,7 @@ class MenuScroll(QLabel):
 
         # Scroll area setup (child of the label)
         self.scroll_area = QScrollArea(self)
-        self.scroll_area.setGeometry(x, 55, width-35, height*4)
+        self.scroll_area.setGeometry(x, 55, width-35, height-40)
         self.scroll_area.setStyleSheet("""
             QScrollArea {
                 background-color: transparent;
@@ -60,7 +60,7 @@ class MenuScroll(QLabel):
         self.scroll_layout = QVBoxLayout(self.scroll_content)
         self.scroll_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.scroll_size = QRect(x, 55, width-35, height*4)
+        self.scroll_size = QRect(x, 55, width-40, 280)
 
         self.scroll_area.setWidget(self.scroll_content)
         container_layout.addWidget(self.scroll_area)
@@ -183,10 +183,12 @@ class MenuScroll(QLabel):
         scroll_content = QWidget()
         scroll_layout = QVBoxLayout(scroll_content)
         scroll_layout.setContentsMargins(16, 0, 16, 0)  # Indent left and right
+        
         for i in range(len(self.user.tasks)):
             self.load_task(i, scroll_layout)
+         
         self.create_task_button(scroll_layout)
-        scroll_layout.addStretch()  # Push tasks to the top if few
+        scroll_layout.addStretch()  # Push tasks to the top if few   
         self.scroll_area.setWidget(scroll_content)
         self.scroll_area.hide()
 
@@ -220,22 +222,22 @@ class MenuScroll(QLabel):
 
         # Create task UI
         task_widget = QWidget()
+        task_widget.setFixedHeight(35)
         layout = QVBoxLayout(task_widget)
         layout.setGeometry(self.scroll_size)
-        layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
 
         # Horizontal layout with checkbox and label
         row_widget = QWidget()
         row_layout = QHBoxLayout(row_widget)
-        row_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        # row_widget.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         row_layout.setContentsMargins(0, 0, 0, 0)
 
         checkbox = QCheckBox()
         checkbox.stateChanged.connect(lambda state, idx=index: self.on_checkbox_toggled(idx, state))
         checkbox.setContentsMargins(0, 0, 0, 0)
-        checkbox.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
-        checkbox.setStyleSheet("padding: 0px; margin: 0px;")
+        # checkbox.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        # checkbox.setStyleSheet("padding: 0px; margin: 0px;")
 
         label = QLabel(description)
         label.setWordWrap(True)
@@ -256,13 +258,9 @@ class MenuScroll(QLabel):
 
         # Create and style deadline label
         deadline_label = QLabel(f"Due: {deadline}")
-        deadline_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        deadline_label.setStyleSheet("""
-            font-size: 14px;
-            padding: 0px;
-            margin: 0px;
-        """)
-        deadline_label.setContentsMargins(0, 0, 0, 0)
+        # deadline_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        deadline_label.setStyleSheet("font-size: 14px; padding: 0px; margin: 0px;")
+        deadline_label.setContentsMargins(36, 0, 0, 0)
 
         # Add label to container layout
         deadline_layout.addWidget(deadline_label)
@@ -283,19 +281,19 @@ class MenuScroll(QLabel):
 
         # Task container
         task_widget = QWidget()
+        task_widget.setFixedHeight(65)
         layout = QVBoxLayout(task_widget)
-        layout.setSpacing(4)  # Small vertical gap between sections
         layout.setContentsMargins(0, 0, 0, 0)
 
         # --- Bullet row (like checkbox+label) ---
         row_widget = QWidget()
         row_layout = QHBoxLayout(row_widget)
         row_layout.setContentsMargins(0, 0, 0, 0)
-        row_layout.setSpacing(4)
+        # row_layout.setSpacing(10)
 
-        bullet = QLabel("•")
+        bullet = QLabel("✪")
         bullet.setStyleSheet("font-size: 16px; color: white;")
-        bullet.setFixedWidth(10)
+        bullet.setFixedWidth(16)
 
         label = QLabel(description)
         label.setWordWrap(True)
@@ -325,40 +323,45 @@ class MenuScroll(QLabel):
         delete_button = QPushButton("Delete")
         restore_button = QPushButton("Restore")
 
-        button_layout.addStretch()
+        # button_layout.addStretch()
         button_layout.addWidget(delete_button)
         button_layout.addWidget(restore_button)
-        button_layout.addStretch()
+        # button_layout.addStretch()
 
         def on_delete_clicked():
+            self.sfx_player.play_sfx(R("assets/audio/sfx/delete_task.mp3"))
             self.user.delete_task(index)
             save_user(self.user, 'data/test.json')
+            self.update_finished_tasks()
 
-            # --- CLEAR EXISTING TASKS ---
-            while layout.count():
-                item = layout.takeAt(0)
-                widget = item.widget()
-                if widget is not None:
-                    widget.setParent(None)
+            # # --- CLEAR EXISTING TASKS ---
+            # while layout.count():
+            #     item = layout.takeAt(0)
+            #     widget = item.widget()
+            #     if widget is not None:
+            #         widget.setParent(None)
 
-            # --- RELOAD ALL TASKS ---
-            for i in range(len(self.user.finished_tasks)):
-                self.load_finished_task(i, layout)
+            # # --- RELOAD ALL TASKS ---
+            # for i in range(len(self.user.finished_tasks)):
+            #     self.load_finished_task(i, layout)
 
         def on_restore_clicked():
+            self.sfx_player.play_sfx(R("assets/audio/sfx/delete_task.mp3"))
             self.user.restore_task(index)
             save_user(self.user, 'data/test.json')
+            self.update_finished_tasks()
+            self.se
 
-            # --- CLEAR EXISTING TASKS ---
-            while layout.count():
-                item = layout.takeAt(0)
-                widget = item.widget()
-                if widget is not None:
-                    widget.setParent(None)
+            # # --- CLEAR EXISTING TASKS ---
+            # while layout.count():
+            #     item = layout.takeAt(0)
+            #     widget = item.widget()
+            #     if widget is not None:
+            #         widget.setParent(None)
 
-            # --- RELOAD ALL TASKS ---
-            for i in range(len(self.user.finished_tasks)):
-                self.load_finished_task(i, layout)
+            # # --- RELOAD ALL TASKS ---
+            # for i in range(len(self.user.finished_tasks)):
+            #     self.load_finished_task(i, layout)
 
         delete_button.clicked.connect(on_delete_clicked)
         restore_button.clicked.connect(on_restore_clicked)
@@ -399,6 +402,7 @@ class MenuScroll(QLabel):
 
         # Replacement layout content (hidden initially)
         replacement_widget = QWidget()
+        replacement_widget.setFixedWidth(180)
         replacement_layout = QVBoxLayout(replacement_widget)
         replacement_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -439,6 +443,7 @@ class MenuScroll(QLabel):
             button.show()
 
         def on_save_clicked():
+            self.sfx_player.play_sfx(R("assets/audio/sfx/create_task.mp3"))
             entered_text = task_title.text()
             selected_date = task_deadline.get_selected_date()
 
@@ -459,6 +464,7 @@ class MenuScroll(QLabel):
 
             # --- ADD THE TASK CREATION BUTTON BACK AT THE END ---
             self.create_task_button(layout)
+            layout.addStretch() 
 
         button.clicked.connect(on_button_clicked)
         cancel_button.clicked.connect(on_cancel_clicked)
@@ -484,6 +490,7 @@ class MenuScroll(QLabel):
                 self.load_finished_task(len(self.user.finished_tasks) - 1, self.history_scroll_layout)
                 print('task done')
         self.checkmarked_indices = []
+       
         while self.history_scroll_layout.count():
             item = self.history_scroll_layout.takeAt(0)
             widget = item.widget()
@@ -498,13 +505,14 @@ class MenuScroll(QLabel):
         else:
             for i in range(len(self.user.finished_tasks)):
                 self.load_finished_task(i, self.history_scroll_layout)
+        
+        self.history_scroll_layout.addStretch()
 
     def update_active_tasks(self):
         # Create new scroll content and layout
         new_scroll_content = QWidget()
         new_scroll_layout = QVBoxLayout(new_scroll_content)
         new_scroll_layout.setContentsMargins(16, 0, 16, 0)  # Indent left and right
-        new_scroll_layout.setSpacing(0)
 
         # Save new references
         self.scroll_content = new_scroll_content
@@ -516,6 +524,7 @@ class MenuScroll(QLabel):
 
         # Add creation button
         self.create_task_button(self.scroll_layout)
+        self.scroll_layout.addStretch() 
 
         # Attach new scroll content
         self.scroll_area.setWidget(self.scroll_content)

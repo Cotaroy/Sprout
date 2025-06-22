@@ -14,8 +14,6 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtGui import QFont, QFontDatabase, QPixmap, QAction, QIcon, QMovie
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QMenu, QPushButton, QSystemTrayIcon, QWidget, QScrollArea, QVBoxLayout, QSizePolicy
 
-from PyQt6.QtMultimedia import QMediaDevices
-
 from user import run_at_midnight
 
 SCROLL_WIDTH = 250
@@ -129,15 +127,15 @@ class MainWindow(QMainWindow):
         self.user.streaks += TESTING_STREAK_NUMBER_CHANGE
 
     def choose_background(self):
-        if self.user.streaks >= 22:
+        if self.user.streaks >= 20:
             return 'Base_Bg5.png'
-        elif self.user.streaks >= 15:
+        elif self.user.streaks >= 14:
             return 'Base_Bg4.png'
-        elif self.user.streaks >= 9:
+        elif self.user.streaks >= 7:
             return 'Base_Bg3.png'
-        elif self.user.streaks >= 5:
+        elif self.user.streaks >= 4:
             return 'Base_Bg2.png'
-        elif self.user.streaks >= 3:
+        elif self.user.streaks >= 2:
             return 'Base_Bg1.png'
         else:
             return 'Base_Bg.png'
@@ -250,12 +248,15 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'gif_label'):
             self.gif_label.setMovie(None)
             standstill_movie = QMovie(R("assets/stand_still.gif"))
+            
             if not standstill_movie.isValid():
                 print("stand_still.gif not found or invalid!")
                 return
+            
             self.gif_label.setMovie(standstill_movie)
             self.gif_label.setScaledContents(True)
             standstill_movie.start()
+        
         # Show text bubble after stationary gif begins playing
         # wait 0.15 seconds before showing text bubble
         QtCore.QTimer.singleShot(200, lambda: self.show_text_bubble())
